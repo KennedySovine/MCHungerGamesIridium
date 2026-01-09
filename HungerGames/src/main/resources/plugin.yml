@@ -1,0 +1,4 @@
+name: HungerGames
+version: '1.0-SNAPSHOT'
+main: io.github.KennedySovine.hungerGames.HungerGames
+api-version: '1.21'
