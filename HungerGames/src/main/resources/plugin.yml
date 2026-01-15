@@ -2,3 +2,70 @@ name: HungerGames
 version: '1.0-SNAPSHOT'
 main: io.github.KennedySovine.hungerGames.HungerGames
 api-version: '1.21'
+description: A Hunger Games style Minecraft plugin.
+author: KennedySovine
+
+commands:
+  create:
+    description: Create a new Hunger Games arena.
+    usage: /hg arena create <arenaName>
+    permission: HungerGames.admin
+    permission-message: You do not have permission to create an arena.
+  maxplayers:
+    description: Set the maximum number of players for the arena.
+    usage: /hg arena maxplayers <arenaName> <maxPlayers>
+    permission: HungerGames.admin
+    permission-message: You do not have permission to set max players.
+  minplayers:
+    description: Set the minimum number of players for the arena.
+    usage: /hg arena minplayers <arenaName> <minPlayers>
+    permission: HungerGames.admin
+    permission-message: You do not have permission to set min players.
+  time:
+    description: Set the game time for the arena.
+    usage: /hg time <arenaName> <timeInSeconds>
+    permission: HungerGames.admin
+    permission-message: You do not have permission to set game time.
+  centersize:
+    description: Set the center size for the arena.
+    usage: /hg centersize <arenaName> <size>
+    permission: HungerGames.admin
+    permission-message: You do not have permission to set center size.
+  graceperiod:
+    description: Set the grace period for the arena.
+    usage: /hg graceperiod <arenaName> <timeInSeconds>
+    permission: HungerGames.admin
+    permission-message: You do not have permission to set grace period.
+  chestrefill:
+    description: Set the chest refill time for the arena.
+    usage: /hg chestrefill <arenaName> <timeInSeconds>
+    permission: HungerGames.admin
+    permission-message: You do not have permission to set chest refill time.
+  addspawn:
+    description: Add a spawn point to the arena.
+    usage: /hg arena addspawn <arenaName>
+    permission: HungerGames.admin
+    permission-message: You do not have permission to add spawn points.
+  removespawn:
+    description: Remove a spawn point from the arena.
+    usage: /hg arena removespawn <arenaName> <spawnIndex>
+    permission: HungerGames.admin
+    permission-message: You do not have permission to remove spawn points.
+  start:
+    description: Start the Hunger Games in the specified arena.
+    usage: /hg start <arenaName>
+    permission: HungerGames.admin
+    permission-message: You do not have permission to start the game.
+  stop:
+    description: Stop the Hunger Games in the specified arena.
+    usage: /hg stop <arenaName>
+    permission: HungerGames.admin
+    permission-message: You do not have permission to stop the game.
+  join:
+    description: Join a Hunger Games arena.
+    usage: /hg join <arenaName>
+    permission: HungerGames.player
+  leave:
+    description: Leave the current Hunger Games arena.
+    usage: /hg leave
+    permission: HungerGames.player
