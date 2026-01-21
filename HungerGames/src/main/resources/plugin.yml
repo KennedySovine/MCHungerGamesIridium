@@ -1,71 +1,78 @@
 name: HungerGames
-version: '1.0-SNAPSHOT'
+version: '1.0.0'
 main: io.github.KennedySovine.hungerGames.HungerGames
 api-version: '1.21'
-description: A Hunger Games style Minecraft plugin.
+description: "HungerGames - Lightweight Hunger Games plugin with multiple arenas, spectating, chest refills and combat logging."
 author: KennedySovine
 
+# Primary command: /hg (dispatcher)
 commands:
-  create:
-    description: Create a new Hunger Games arena.
-    usage: /hg arena create <arenaName>
-    permission: HungerGames.admin
-    permission-message: You do not have permission to create an arena.
-  maxplayers:
-    description: Set the maximum number of players for the arena.
-    usage: /hg arena maxplayers <arenaName> <maxPlayers>
-    permission: HungerGames.admin
-    permission-message: You do not have permission to set max players.
-  minplayers:
-    description: Set the minimum number of players for the arena.
-    usage: /hg arena minplayers <arenaName> <minPlayers>
-    permission: HungerGames.admin
-    permission-message: You do not have permission to set min players.
-  time:
-    description: Set the game time for the arena.
-    usage: /hg time <arenaName> <timeInSeconds>
-    permission: HungerGames.admin
-    permission-message: You do not have permission to set game time.
-  centersize:
-    description: Set the center size for the arena.
-    usage: /hg centersize <arenaName> <size>
-    permission: HungerGames.admin
-    permission-message: You do not have permission to set center size.
-  graceperiod:
-    description: Set the grace period for the arena.
-    usage: /hg graceperiod <arenaName> <timeInSeconds>
-    permission: HungerGames.admin
-    permission-message: You do not have permission to set grace period.
-  chestrefill:
-    description: Set the chest refill time for the arena.
-    usage: /hg chestrefill <arenaName> <timeInSeconds>
-    permission: HungerGames.admin
-    permission-message: You do not have permission to set chest refill time.
-  addspawn:
-    description: Add a spawn point to the arena.
-    usage: /hg arena addspawn <arenaName>
-    permission: HungerGames.admin
-    permission-message: You do not have permission to add spawn points.
-  removespawn:
-    description: Remove a spawn point from the arena.
-    usage: /hg arena removespawn <arenaName> <spawnIndex>
-    permission: HungerGames.admin
-    permission-message: You do not have permission to remove spawn points.
-  start:
-    description: Start the Hunger Games in the specified arena.
-    usage: /hg start <arenaName>
-    permission: HungerGames.admin
-    permission-message: You do not have permission to start the game.
-  stop:
-    description: Stop the Hunger Games in the specified arena.
-    usage: /hg stop <arenaName>
-    permission: HungerGames.admin
-    permission-message: You do not have permission to stop the game.
-  join:
-    description: Join a Hunger Games arena.
-    usage: /hg join <arenaName>
-    permission: HungerGames.player
-  leave:
-    description: Leave the current Hunger Games arena.
-    usage: /hg leave
-    permission: HungerGames.player
+  hg:
+    description: HungerGames main command (use /hg <subcommand>)
+    aliases: [hungergames]
+    usage: /hg <subcommand>
+    permission-message: You do not have permission to use HungerGames commands.
+
+# Permission nodes used by the plugin
+permissions:
+  HungerGames.admin:
+    description: Grants access to admin commands (arena creation, editing, start/stop)
+    default: op
+  HungerGames.player:
+    description: Basic permission to use player-facing hg commands (join/leave)
+    default: true
+  HungerGames.overridecombat:
+    description: Exempt from combat-logging rules (use with caution)
+    default: op
+  HungerGames.gui:
+    description: Permission to open the admin GUI (arena editor)
+    default: op
+  HungerGames.stats.view:
+    description: Allow viewing other players' stats (used by /hg stats <player>)
+    default: op
+
+# Subcommand reference (this file is the authoritative mapping of command names/usages.
+# The plugin uses a single /hg dispatcher; each of the following subcommands should be
+# registered by the plugin and enforce the listed permission nodes.
+#
+# ADMIN SUBCOMMANDS (require HungerGames.admin unless noted)
+# /hg arena create <arenaName>
+#   Create a new arena id. Stores minimal defaults in arenas.yml.
+# /hg arena addspawn <arenaName>
+#   Add a spawn point at your current location. Player-only.
+# /hg arena removespawn <arenaName> <spawnIndex>
+#   Remove spawn by zero-based index.
+# /hg maxplayers <arenaName> <number>
+#   Set maximum players allowed in arena.
+# /hg minplayers <arenaName> <number>
+#   Set minimum players required to start.
+# /hg time <arenaName> <timeInSeconds>
+#   Set time before the border begins shrinking (seconds).
+# /hg centersize <arenaName> <size>
+#   Set final center size (units depend on implementation; typically radius).
+# /hg graceperiod <arenaName> <timeInSeconds>
+#   Set grace period for out-of-combat disconnects (seconds).
+# /hg chestrefill <arenaName> <timeInSeconds>
+#   Set chest refill interval for the arena (seconds).
+# /hg start <arenaName>
+#   Start a match immediately in the arena.
+# /hg stop <arenaName>
+#   Stop the currently running match and reset arena state.
+#
+# PLAYER SUBCOMMANDS (default permission: HungerGames.player)
+# /hg join <arenaName>
+#   Join arena lobby.
+# /hg leave
+#   Leave current arena.
+# /hg stats [player]
+#   View your own or another player's stats. Viewing others requires HungerGames.stats.view.
+
+# Notes for server admins:
+# - The plugin persists arena definitions to arenas.yml in the plugin data folder.
+# - Combat logging rules: players who disconnect while in recent combat (default 10s)
+#   will be considered dead immediately. Players who disconnect while not in combat
+#   receive a default 120s grace period before being marked dead. These defaults are
+#   configurable in config.yml.
+# - GUI support: /hg gui (or via permission HungerGames.gui) will be implemented in the GUI stage.
+
+# End of plugin.yml
