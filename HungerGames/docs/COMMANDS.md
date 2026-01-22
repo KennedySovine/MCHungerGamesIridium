@@ -1,18 +1,21 @@
 HungerGames — Command Reference
 
-This document is generated as a template for the `/hg` command dispatcher. Keep this file in sync with the Javadocs for each SubCommand implementation.
+This document is the authoritative reference for the `/hg` command dispatcher used by the plugin skeleton. Keep this file in sync with the Javadocs for each SubCommand implementation.
 
 Usage: /hg <subcommand> [args]
 
 Admin Commands (permission: HungerGames.admin)
 - /hg arena create <arenaName>
-  Description: Create a new arena with id <arenaName>. Use `/hg arena addspawn <arenaName>` or the GUI later to add spawn points.
+  Description: Create a new arena with id <arenaName>. Stores minimal defaults in arenas.yml. Use `/hg arena addspawn <arenaName>` to add spawn points.
 
 - /hg arena addspawn <arenaName>
-  Description: Add a spawn point at your current location for the given arena (player-only).
+  Description: Add a spawn point at your current location for the given arena (player-only; admin permission required).
 
 - /hg arena removespawn <arenaName> <spawnIndex>
-  Description: Remove the spawn point by index (0-based); check `/hg arena listspawns <arenaName>` for indices.
+  Description: Remove the spawn point by index (0-based).
+
+- /hg arena delete <arenaName>
+  Description: Delete the arena configuration from storage.
 
 - /hg maxplayers <arenaName> <number>
   Description: Set maximum players allowed in an arena.
@@ -21,22 +24,22 @@ Admin Commands (permission: HungerGames.admin)
   Description: Set minimum players required to start a match.
 
 - /hg time <arenaName> <timeInSeconds>
-  Description: Time before the border starts shrinking / deathmatch triggers.
+  Description: Set time (seconds) before the border begins shrinking (deathmatch timer).
 
-- /hg centersize <arenaName> <size>
-  Description: Final center size (radius or diameter depending on implementation) for deathmatch.
+- /hg centresize <arenaName> <size>
+  Description: Set the final center size for the deathmatch border.
 
 - /hg graceperiod <arenaName> <timeInSeconds>
-  Description: Set arena-specific grace period for out-of-combat disconnects.
+  Description: Set arena-specific grace period (seconds) for out-of-combat disconnects.
 
 - /hg chestrefill <arenaName> <timeInSeconds>
-  Description: Configure chest refill interval.
+  Description: Configure chest refill interval (seconds) for the arena.
 
 - /hg start <arenaName>
-  Description: Start a match in the specified arena.
+  Description: Start a match immediately in the specified arena.
 
 - /hg stop <arenaName>
-  Description: Stop the running match in the arena and reset players.
+  Description: Stop the running match in the arena and reset arena state.
 
 Player Commands (permission: HungerGames.player)
 - /hg join <arenaName>
@@ -46,14 +49,14 @@ Player Commands (permission: HungerGames.player)
   Description: Leave your current arena and return to the lobby.
 
 - /hg stats [player]
-  Description: Display kills/deaths/wins/losses for a player or yourself.
+  Description: Display kills/deaths/wins/losses for a player or yourself (stats are only available for the most recent completed match, non-persistent across server restarts).
 
 Notes
-- Tab completion should suggest arena names for commands that take <arenaName>.
-- Admin commands should provide clear error messages when arguments are missing or invalid.
-- All commands should be thoroughly documented in Javadocs in the source files.
+- Tab completion has been intentionally disabled for now; it will be added later in a follow-up change.
+- Admin commands must provide clear error messages when arguments are missing or invalid.
+- Arena lobby locations will be set via the Arena Editor GUI in a later phase (command-based `setlobby` removed).
+- The plugin persists arena definitions to arenas.yml in the plugin data folder.
 
 Next steps
 - Implement manager hooks (ArenaManager, GameManager, StatsManager) and wire commands to them.
-- Add unit tests for parsing utilities and tab-completion helpers.
-
+- Add unit tests for parsing utilities and integration/manual tests on a dev server.

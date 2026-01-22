@@ -37,14 +37,16 @@ public final class HungerGames extends JavaPlugin {
         hgCommand.registerSubCommand("arena create", new CreateArenaCommand());
         hgCommand.registerSubCommand("arena addspawn", new AddSpawnCommand());
         hgCommand.registerSubCommand("arena removespawn", new RemoveSpawnCommand());
+        hgCommand.registerSubCommand("arena delete", new io.github.KennedySovine.hungerGames.command.admin.DeleteArenaCommand());
         hgCommand.registerSubCommand("maxplayers", new MaxPlayersCommand());
         hgCommand.registerSubCommand("minplayers", new MinPlayersCommand());
         hgCommand.registerSubCommand("time", new TimeCommand());
-        hgCommand.registerSubCommand("centersize", new CenterSizeCommand());
+        hgCommand.registerSubCommand("centresize", new CenterSizeCommand());
         hgCommand.registerSubCommand("graceperiod", new GracePeriodCommand());
         hgCommand.registerSubCommand("chestrefill", new ChestRefillCommand());
         hgCommand.registerSubCommand("start", new StartCommand());
         hgCommand.registerSubCommand("stop", new StopCommand());
+        // 'setlobby' command removed per project scope. GUI or alternate admin flow will set lobbies later.
         hgCommand.registerSubCommand("join", new JoinCommand());
         hgCommand.registerSubCommand("leave", new LeaveCommand());
         hgCommand.registerSubCommand("stats", new StatsCommand());
@@ -52,7 +54,7 @@ public final class HungerGames extends JavaPlugin {
         // Register with Bukkit to handle /hg
         if (getCommand("hg") != null) {
             getCommand("hg").setExecutor(hgCommand);
-            getCommand("hg").setTabCompleter(hgCommand);
+            // Tab completion intentionally disabled for now per project request.
         } else {
             getLogger().severe("Command 'hg' is not defined in plugin.yml!");
         }

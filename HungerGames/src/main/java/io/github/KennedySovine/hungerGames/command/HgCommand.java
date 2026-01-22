@@ -4,20 +4,16 @@ import io.github.KennedySovine.hungerGames.HungerGames;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
-import org.bukkit.command.TabCompleter;
-import org.bukkit.command.TabExecutor;
 
 import java.util.*;
 
 /**
  * Central dispatcher for the /hg command. Holds a registry of SubCommand
- * implementations and routes execution and tab-completion to them.
+ * implementations and routes execution to them.
  *
- * This class is intentionally small: heavy logic should live in subcommands
- * or manager classes. All subcommands should be registered during plugin
- * initialization (onEnable) via registerSubCommand(...).
+ * NOTE: Tab-completion logic has been removed for now per project requirements.
  */
-public class HgCommand implements CommandExecutor, TabCompleter {
+public class HgCommand implements CommandExecutor {
 
     private final HungerGames plugin;
     private final Map<String, SubCommand> commands = new LinkedHashMap<>();
@@ -73,35 +69,6 @@ public class HgCommand implements CommandExecutor, TabCompleter {
         }
     }
 
-    @Override
-    public List<String> onTabComplete(CommandSender sender, Command command, String alias, String[] args) {
-        if (args.length == 0 || args.length == 1) {
-            // suggest top-level subcommands filtered by permission
-            List<String> suggestions = new ArrayList<>();
-            for (Map.Entry<String, SubCommand> e : commands.entrySet()) {
-                String node = e.getValue().permission();
-                if (node == null || node.isEmpty() || sender.hasPermission(node)) {
-                    suggestions.add(e.getKey());
-                }
-            }
-            Collections.sort(suggestions);
-            return suggestions;
-        }
-
-        // delegate to subcommand tabComplete
-        String sub = args[0].toLowerCase(Locale.ROOT);
-        String resolved = aliasMap.getOrDefault(sub, sub);
-        SubCommand cmd = commands.get(resolved);
-        if (cmd == null) return Collections.emptyList();
-        String[] subArgs = Arrays.copyOfRange(args, 1, args.length);
-        try {
-            return cmd.tabComplete(sender, subArgs);
-        } catch (Exception ex) {
-            plugin.getLogger().warning("Tab-complete error for subcommand " + sub + ": " + ex.getMessage());
-            return Collections.emptyList();
-        }
-    }
-
     private void sendHelp(CommandSender sender) {
         sender.sendMessage("\n&6HungerGames Commands &7(usage)");
         for (Map.Entry<String, SubCommand> e : commands.entrySet()) {
@@ -112,4 +79,3 @@ public class HgCommand implements CommandExecutor, TabCompleter {
         }
     }
 }
-
