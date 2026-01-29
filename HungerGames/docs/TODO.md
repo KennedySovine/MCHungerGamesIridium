@@ -15,6 +15,13 @@ Quick plan for this update
 - Mark `SetLobbyCommand` for removal (file should be deleted).
 - Add per-file actionable TODOs reflecting the current codebase.
 
+Quick plan for this update
+- Add explicit combat-logging rules and reconnect/grace behavior.
+- Lock down the exact commands to implement now (commands-first, GUI later).
+- Call out chest-loot config usage and class stubs to implement.
+- Mark `SetLobbyCommand` for removal (file should be deleted).
+- Add per-file actionable TODOs reflecting the current codebase.
+
 General rules
 - Add Javadoc to every public class and public method explaining inputs/outputs and side-effects.
 - Inline-comment any non-trivial logic (parsing, thread expectations, permission checks).
@@ -51,6 +58,46 @@ Commands (these are the ONLY commands to implement now)
   - /hg stats (shows only post-game stats for the last finished match)
 
 Notes:
+- Do NOT wire any admin commands to GUI code yet — commands must perform only data/manager operations and persist via `ArenaManager`.
+- Tab completion logic is intentionally omitted for now.
+
+Configuration
+- `src/main/resources/config.yml` holds the `chest-loot` mapping. The plugin must expose a `ChestLootManager` (or similar) which reads this mapping and provides `populateChest(Inventory)`.
+- Runtime config location: `plugins/HungerGames/config.yml` (created via `saveDefaultConfig()` in main class).
+- The `chest-loot` format (example in `config.yml`) must be followed. The `ChestItem` model should include: material, min, max, weight, enchants.
+
+Project decisions (explicit)
+- Commands-first: implement all command classes and managers before building GUIs.
+- No kits or teams in this phase — skip them entirely.
+- Stats are NOT persistent across games. Stats exist only for the duration of a single match and are queryable only after a game ends.
+- Combat-logging rules (exact):
+  - If a player receives damage, they are considered "in combat".
+  - A player remains "in combat" until 10 seconds have passed since the last damage event.
+  - If a player disconnects while considered "in combat" (including the 10s trailing window), treat them as immediately killed on disconnect. If they reconnect, show death/spectator state and a short message indicating they were killed due to combat logging.
+  - If a player disconnects while NOT in combat, start a 120-second (2 minute) reconnect grace timer. If the player returns before the grace expires, restore their match state. If the grace expires, mark the player dead and run the normal death flow.
+  - While a player is disconnected and in-grace, do not expose a physical offline player entity to others (players offline have no in-world entity). Ensure match bookkeeping holds their slot but prevents griefing/exploitation.
+
+Commands (these are the ONLY commands to implement now)
+- Admin commands (permission: `hungergames.admin`):
+  - /hg arena create <MAPNAME>
+  - /hg arena delete <MAPNAME>
+  - /hg maxplayers <MAPNAME> <NUMBER>
+  - /hg minplayers <MAPNAME> <NUMBER>
+  - /hg time <MAPNAME> <TIME_IN_SECONDS>
+  - /hg centresize <MAPNAME> <SIZE>
+  - /hg graceperiod <MAPNAME> <TIME_IN_SECONDS>
+  - /hg chestrefill <MAPNAME> <TIME_IN_SECONDS>
+  - /hg addspawn <MAPNAME>
+  - /hg removespawn <MAPNAME> <INDEX>
+  - /hg stop
+  - /hg setlobby  <-- DEPRECATED: THIS COMMAND HAS BEEN REMOVED. See note below.
+- Player commands (no permission required):
+  - /hg join <MAPNAME>
+  - /hg leave <MAPNAME>
+  - /hg stats (shows only post-game stats for the last finished match)
+
+Notes:
+- `setlobby` is removed from the command roster. The file `src/main/java/io/github/KennedySovine/hungerGames/command/admin/SetLobbyCommand.java` must be deleted from the repository to avoid confusion.
 - Do NOT wire any admin commands to GUI code yet — commands must perform only data/manager operations and persist via `ArenaManager`.
 - Tab completion logic is intentionally omitted for now.
 
@@ -190,6 +237,7 @@ PHASE 4 — polish & persistence upgrade
 - Implement migration script from YAML files to DB on first run.
 
 <<<<<<< Updated upstream
+<<<<<<< Updated upstream
 Testing & QA (detailed)
 - Unit tests for pure functions:
   - `LocationUtils.serialize/deserialize` round-trip.
@@ -200,6 +248,16 @@ Testing & QA (detailed)
   - `/hg arena addspawn test` with player; check resulting `arenas.yml` contains spawn line.
   - PvP: damage player and disconnect -> immediate death message.
   - Non-combat disconnect -> reconnect within grace restores; after expiry player marked dead.
+=======
+Files explicitly marked for removal
+- `src/main/java/io/github/KennedySovine/hungerGames/command/admin/SetLobbyCommand.java` — delete this file and remove any references to it from docs or command registration.
+
+Small developer checklist (when implementing a file)
+- Implement methods listed above.
+- Compile / fix any errors.
+- Add Javadoc and inline comments for non-trivial logic.
+- Add small manual test instructions to the top of the file (as a comment) describing how to verify behavior on a dev server.
+>>>>>>> Stashed changes
 
 Completion criteria (how to mark items done)
 - Tick the checkbox in this TODO file when the file's listed methods are implemented, compiled without warnings (or minimal unavoidable warnings), and manual/integration tests pass as described.
@@ -221,4 +279,7 @@ Completion criteria
 If you'd like, I can now implement any single manager or command. Reply with which file(s) to implement next (for example: "Implement ArenaManager and CreateArenaCommand").
 
 Note: the `SetLobbyCommand` source file exists as a deprecated placeholder (not registered). Delete it when ready.
+<<<<<<< Updated upstream
+>>>>>>> Stashed changes
+=======
 >>>>>>> Stashed changes
