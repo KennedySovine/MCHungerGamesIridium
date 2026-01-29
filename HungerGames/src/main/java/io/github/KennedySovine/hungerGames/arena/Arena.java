@@ -1,5 +1,6 @@
 package io.github.KennedySovine.hungerGames.arena;
 
+import io.github.KennedySovine.hungerGames.utils.LocationUtils;
 import org.bukkit.Location;
 
 import java.util.ArrayList;
@@ -8,8 +9,14 @@ import java.util.List;
 /**
  * Data holder for a HungerGames arena configuration.
  *
- * This class is a simple POJO used by ArenaManager. It stores arena settings
- * and spawn locations. Implementers should expand it as needed (e.g. validation).
+ * This class stores configuration for an arena. Spawn points are stored as
+ * relative-offset strings (see LocationUtils.serializeRelative). The intended
+ * workflow:
+ * - An admin stands in the arena center and runs the "add spawn" command.
+ * - The arena's lobbyLocation must be set to the center before adding spawns.
+ * - addSpawnRelative(center, loc) will store the offset string.
+ * - When the arena is loaded/activated for a player, call
+ *   getAbsoluteSpawns(currentCenter) to compute absolute spawn Locations.
  */
 public class Arena {
 
@@ -22,7 +29,9 @@ public class Arena {
     private int gracePeriodSeconds = 120;
     private int chestRefillSeconds = 300;
     private Location lobbyLocation;
-    private final List<Location> spawns = new ArrayList<>();
+
+    // Spawn points stored as relative offset strings (dx,dy,dz,dyaw,dpitch)
+    private final List<String> spawnOffsets = new ArrayList<>();
 
     public Arena(String id, String displayName) {
         this.id = id;
@@ -97,16 +106,69 @@ public class Arena {
         this.lobbyLocation = lobbyLocation;
     }
 
-    public List<Location> getSpawns() {
-        return spawns;
+    /**
+     * Returns the raw relative-offset strings stored for this arena.
+     */
+    public List<String> getSpawnOffsets() {
+        return spawnOffsets;
     }
 
-    public void addSpawn(Location loc) {
-        spawns.add(loc);
+    /**
+     * Add a spawn offset string directly. The string must be in the format
+     * produced by LocationUtils.serializeRelative(center, loc) or may be an
+     * absolute location string produced by LocationUtils.serialize(loc) to
+     * preserve compatibility with older files.
+     */
+    public void addSpawnOffset(String offsetStr) {
+        spawnOffsets.add(offsetStr);
     }
 
+    /**
+     * Add a spawn by providing an absolute Location and the center Location
+     * that was used when the admin added the spawn. This method will compute
+     * and store the relative offset string.
+     *
+     * Note: callers are expected to pass the arena's lobbyLocation as the
+     * center if they follow the admin workflow (admin stands in center).
+     */
+    public void addSpawnRelative(Location center, Location absoluteLoc) {
+        String s = LocationUtils.serializeRelative(center, absoluteLoc);
+        spawnOffsets.add(s);
+    }
+
+    /**
+     * Remove the spawn offset at the given index. Safe if index invalid.
+     */
     public void removeSpawn(int index) {
-        if (index >= 0 && index < spawns.size()) spawns.remove(index);
+        if (index >= 0 && index < spawnOffsets.size()) spawnOffsets.remove(index);
+    }
+
+    /**
+     * Compute absolute spawn Locations by applying the stored relative offsets
+     * to the provided center Location. Behavior:
+     * - If a stored string has 5 comma-separated parts it is treated as a
+     *   relative offset and is applied to the provided center using
+     *   LocationUtils.deserializeRelative.
+     * - If a stored string has 6+ parts it is treated as a legacy absolute
+     *   location and parsed via LocationUtils.deserialize.
+     * Offsets that fail to parse are skipped.
+     */
+    public List<Location> getAbsoluteSpawns(Location center) {
+        List<Location> out = new ArrayList<>();
+        if (spawnOffsets.isEmpty()) return out;
+        for (String s : spawnOffsets) {
+            if (s == null || s.isEmpty()) continue;
+            String[] parts = s.split(",");
+            Location loc = null;
+            if (parts.length >= 6) {
+                // Legacy absolute location: world,x,y,z,yaw,pitch
+                loc = LocationUtils.deserialize(s);
+            } else if (parts.length == 5) {
+                // Relative offset: dx,dy,dz,dyaw,dpitch
+                if (center != null) loc = LocationUtils.deserializeRelative(center, s);
+            }
+            if (loc != null) out.add(loc);
+        }
+        return out;
     }
 }
-
