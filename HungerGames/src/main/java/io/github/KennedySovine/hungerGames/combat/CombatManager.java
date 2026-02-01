@@ -5,12 +5,12 @@ import io.github.KennedySovine.hungerGames.game.GameManager;
 import io.github.KennedySovine.hungerGames.stats.StatsManager;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
+import org.bukkit.scheduler.BukkitTask;
 
 import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ScheduledFuture;
-import java.util.concurrent.TimeUnit;
 
 /**
  * CombatManager skeleton which tracks last-damage timestamps and pending
@@ -61,8 +61,8 @@ public class CombatManager {
         if (playerUuid == null) return;
 
         // Cancel any previous pending task for safety
-        ScheduledFuture<?> prev = pendingGraceTasks.remove(playerUuid);
-        if (prev != null) prev.cancel(false);
+        BukkitTask prev = (BukkitTask) pendingGraceTasks.remove(playerUuid);
+        if (prev != null) prev.cancel();
 
         if (isInCombat(playerUuid)) {
             // Immediately treat as death: delegate to GameManager
@@ -78,19 +78,18 @@ public class CombatManager {
             return;
         }
 
-        // Not in combat: schedule grace expiry
-        ScheduledFuture<?> task = Bukkit.getScheduler().runTaskLaterAsynchronously(plugin, () -> {
-            // When grace expires, mark player dead on main thread
-            Bukkit.getScheduler().runTask(plugin, () -> {
-                GameManager gm = plugin.getGameManager();
-                StatsManager sm = plugin.getStatsManager();
-                gm.handlePlayerGraceExpired(playerUuid);
-                sm.recordDeath(playerUuid, "disconnected-grace-expired");
-                pendingGraceTasks.remove(playerUuid);
-            });
-        }, defaultGraceMs / 50, TimeUnit.MILLISECONDS); // convert ms to server ticks roughly; placeholder
+        // Not in combat: schedule grace expiry on main thread after computed ticks
+        long ticks = Math.max(1L, defaultGraceMs / 50L); // approximate ms->ticks
+        BukkitTask task = Bukkit.getScheduler().runTaskLater(plugin, () -> {
+            // When grace expires, mark player dead
+            GameManager gm = plugin.getGameManager();
+            StatsManager sm = plugin.getStatsManager();
+            gm.handlePlayerGraceExpired(playerUuid);
+            sm.recordDeath(playerUuid, "disconnected-grace-expired");
+            pendingGraceTasks.remove(playerUuid);
+        }, ticks);
 
-        pendingGraceTasks.put(playerUuid, task);
+        pendingGraceTasks.put(playerUuid, (ScheduledFuture<?>) task);
     }
 
     /**
@@ -99,9 +98,9 @@ public class CombatManager {
     public void handleJoin(UUID playerUuid) {
         if (playerUuid == null) return;
         // Cancel pending kill if present
-        ScheduledFuture<?> task = pendingGraceTasks.remove(playerUuid);
+        BukkitTask task = (BukkitTask) pendingGraceTasks.remove(playerUuid);
         if (task != null) {
-            task.cancel(false);
+            task.cancel();
             // Restore player state via GameManager (best-effort on main thread)
             Bukkit.getScheduler().runTask(plugin, () -> {
                 GameManager gm = plugin.getGameManager();

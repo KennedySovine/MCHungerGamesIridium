@@ -5,12 +5,10 @@ import io.github.KennedySovine.hungerGames.arena.Arena;
 import io.github.KennedySovine.hungerGames.arena.ArenaManager;
 import io.github.KennedySovine.hungerGames.command.AbstractSubCommand;
 import org.bukkit.command.CommandSender;
+import org.bukkit.plugin.java.JavaPlugin;
 
 import java.util.Optional;
 
-/**
- * /hg minplayers <arenaName> <number>
- */
 public class MinPlayersCommand extends AbstractSubCommand {
 
     @Override
@@ -20,7 +18,7 @@ public class MinPlayersCommand extends AbstractSubCommand {
 
     @Override
     public String usage() {
-        return "/hg minplayers <arenaName> <number>";
+        return "/hg minplayers <number>";
     }
 
     @Override
@@ -28,14 +26,34 @@ public class MinPlayersCommand extends AbstractSubCommand {
         return "HungerGames.admin";
     }
 
+    /**
+     * Execute handler for minplayers.
+     *
+     * Parameters:
+     * - sender: the command issuer
+     * - args: args[0] = numeric min players value
+     *
+     * Behavior:
+     * - Requires permission: HungerGames.admin
+     * - Updates the working arena's minPlayers value (in-memory).
+     * - Does NOT persist; use `/hg arena save` to persist.
+     */
     @Override
     public boolean execute(CommandSender sender, String[] args) {
-        if (args.length < 2) {
-            sender.sendMessage("&cUsage: " + usage());
+        if (args.length != 1) {
+            sender.sendMessage("&cUsage: " + usage() + " — this command only accepts a single <number> and operates on the loaded working arena.");
             return true;
         }
-        String arenaId = args[0];
-        Optional<Integer> numOpt = parseInt(sender, args[1]);
+
+        ArenaManager mgr = JavaPlugin.getPlugin(HungerGames.class).getArenaManager();
+        Optional<Arena> workingOpt = mgr.getWorkingArena();
+        if (workingOpt.isEmpty()) {
+            sender.sendMessage("&cNo working arena loaded. Use '/hg arena load <arena>' or '/hg arena create <arena>' first.");
+            return true;
+        }
+        Arena working = workingOpt.get();
+
+        Optional<Integer> numOpt = parseInt(sender, args[0]);
         if (numOpt.isEmpty()) return true;
         int num = numOpt.get();
         if (num <= 0) {
@@ -43,21 +61,12 @@ public class MinPlayersCommand extends AbstractSubCommand {
             return true;
         }
 
-        HungerGames plugin = org.bukkit.plugin.java.JavaPlugin.getPlugin(HungerGames.class);
-        ArenaManager mgr = plugin.getArenaManager();
-        Optional<Arena> aOpt = mgr.getArena(arenaId);
-        if (aOpt.isEmpty()) {
-            sender.sendMessage("&cArena not found: " + arenaId);
+        if (num > working.getMaxPlayers()) {
+            sender.sendMessage("&cMin players cannot be greater than current max players (" + working.getMaxPlayers() + ").");
             return true;
         }
-        Arena a = aOpt.get();
-        if (num > a.getMaxPlayers()) {
-            sender.sendMessage("&cMin players cannot be greater than current max players (" + a.getMaxPlayers() + ").");
-            return true;
-        }
-        a.setMinPlayers(num);
-        mgr.saveArenas();
-        sender.sendMessage("&aSet min players for arena " + arenaId + " to " + num);
+        working.setMinPlayers(num);
+        sender.sendMessage("&aSet min players for working arena " + working.getId() + " to " + num + " (in-memory). Use '/hg arena save' to persist.");
         return true;
     }
 }

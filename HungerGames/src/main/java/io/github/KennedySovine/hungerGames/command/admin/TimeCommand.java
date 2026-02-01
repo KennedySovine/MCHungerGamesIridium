@@ -5,12 +5,10 @@ import io.github.KennedySovine.hungerGames.arena.Arena;
 import io.github.KennedySovine.hungerGames.arena.ArenaManager;
 import io.github.KennedySovine.hungerGames.command.AbstractSubCommand;
 import org.bukkit.command.CommandSender;
+import org.bukkit.plugin.java.JavaPlugin;
 
 import java.util.Optional;
 
-/**
- * /hg time <arenaName> <timeInSeconds>
- */
 public class TimeCommand extends AbstractSubCommand {
 
     @Override
@@ -20,7 +18,7 @@ public class TimeCommand extends AbstractSubCommand {
 
     @Override
     public String usage() {
-        return "/hg time <arenaName> <timeInSeconds>";
+        return "/hg time <timeInSeconds>";
     }
 
     @Override
@@ -28,14 +26,34 @@ public class TimeCommand extends AbstractSubCommand {
         return "HungerGames.admin";
     }
 
+    /**
+     * Execute handler for time.
+     *
+     * Parameters:
+     * - sender: the command issuer
+     * - args: args[0] = time in seconds (integer)
+     *
+     * Behavior:
+     * - Requires permission: HungerGames.admin
+     * - Updates the working arena's time-to-shrink setting (in-memory).
+     * - Does NOT persist; use `/hg arena save` to persist.
+     */
     @Override
     public boolean execute(CommandSender sender, String[] args) {
-        if (args.length < 2) {
-            sender.sendMessage("&cUsage: " + usage());
+        if (args.length != 1) {
+            sender.sendMessage("&cUsage: " + usage() + " — this command only accepts a single <timeInSeconds> and operates on the loaded working arena.");
             return true;
         }
-        String arenaId = args[0];
-        Optional<Integer> tOpt = parseInt(sender, args[1]);
+
+        ArenaManager mgr = JavaPlugin.getPlugin(HungerGames.class).getArenaManager();
+        Optional<Arena> workingOpt = mgr.getWorkingArena();
+        if (workingOpt.isEmpty()) {
+            sender.sendMessage("&cNo working arena loaded. Use '/hg arena load <arena>' or '/hg arena create <arena>' first.");
+            return true;
+        }
+        Arena working = workingOpt.get();
+
+        Optional<Integer> tOpt = parseInt(sender, args[0]);
         if (tOpt.isEmpty()) return true;
         int t = tOpt.get();
         if (t < 0) {
@@ -43,17 +61,8 @@ public class TimeCommand extends AbstractSubCommand {
             return true;
         }
 
-        HungerGames plugin = org.bukkit.plugin.java.JavaPlugin.getPlugin(HungerGames.class);
-        ArenaManager mgr = plugin.getArenaManager();
-        Optional<Arena> aOpt = mgr.getArena(arenaId);
-        if (aOpt.isEmpty()) {
-            sender.sendMessage("&cArena not found: " + arenaId);
-            return true;
-        }
-        Arena a = aOpt.get();
-        a.setTimeToShrinkSeconds(t);
-        mgr.saveArenas();
-        sender.sendMessage("&aSet time-to-shrink for arena " + arenaId + " to " + t + " seconds.");
+        working.setTimeToShrinkSeconds(t);
+        sender.sendMessage("&aSet time-to-shrink for working arena " + working.getId() + " to " + t + " seconds (in-memory). Use '/hg arena save' to persist.");
         return true;
     }
 }

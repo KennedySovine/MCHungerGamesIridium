@@ -4,41 +4,52 @@ This document is generated as a template for the `/hg` command dispatcher. Keep 
 
 Usage: /hg <subcommand> [args]
 
+Working-arena workflow (important)
+- Many admin commands now operate on an in-memory "working" arena. Use `/hg arena load <arenaName>` to copy a persisted arena into the working placeholder, then run edit commands without specifying the arena name.
+- Changes made to the working arena are kept in memory. Run `/hg arena save` to persist the working arena back into the master arenas.yml data.
+- `/hg arena create <arenaName> [displayName]` creates a new master arena entry and automatically loads it into the working placeholder so you can immediately edit it.
+
 Admin Commands (permission: HungerGames.admin)
-- /hg arena create <arenaName>
-  Description: Create a new arena with id <arenaName>. Use `/hg arena addspawn <arenaName>` or the GUI later to add spawn points.
+- /hg arena create <arenaName> [displayName]
+  Description: Create a new arena master entry and load it into the working arena for in-memory edits. Does write to disk to create the master entry so the new arena id exists and can be saved later.
 
-- /hg arena addspawn <arenaName>
-  Description: Add a spawn point at your current location for the given arena (player-only).
+- /hg arena load <arenaName>
+  Description: Copy the master arena (from arenas.yml) into the in-memory working arena. Subsequent edit commands will use the working arena by default and not persist until `/hg arena save` is called.
 
-- /hg arena removespawn <arenaName> <spawnIndex>
-  Description: Remove the spawn point by index (0-based); check `/hg arena listspawns <arenaName>` for indices.
+- /hg arena save
+  Description: Persist the currently loaded working arena back into the master arenas list and write to arenas.yml. Fails if there is no working arena loaded or if the working arena id is not present in master (created but not saved).
 
-- /hg maxplayers <arenaName> <number>
-  Description: Set maximum players allowed in an arena.
+- /hg arena addspawn [arenaName]
+  Description: Add a spawn point at your current location to the working arena (in-memory). If an arenaName is provided it must match the currently loaded working arena id. Changes are in-memory; use `/hg arena save` to persist.
 
-- /hg minplayers <arenaName> <number>
-  Description: Set minimum players required to start a match.
+- /hg arena removespawn [arenaName] <spawnIndex>
+  Description: Remove a spawn from the working arena (by index) or, if invoked as a player with only an arenaName, remove a spawn at the player's current location (within a small radius). Prefers working arena edits; provides guidance to run `/hg arena save` afterwards.
 
-- /hg time <arenaName> <timeInSeconds>
-  Description: Time before the border starts shrinking / deathmatch triggers.
+- /hg maxplayers <number>
+  Description: Set the working arena's maxPlayers (in-memory). Use `/hg arena save` to persist.
 
-- /hg centersize <arenaName> <size>
-  Description: Final center size (radius or diameter depending on implementation) for deathmatch.
+- /hg minplayers <number>
+  Description: Set the working arena's minPlayers (in-memory). Use `/hg arena save` to persist.
 
-- /hg graceperiod <arenaName> <timeInSeconds>
-  Description: Set arena-specific grace period for out-of-combat disconnects.
+- /hg time <timeInSeconds>
+  Description: Set the working arena's time-to-shrink (in-memory). Use `/hg arena save` to persist.
 
-- /hg chestrefill <arenaName> <timeInSeconds>
-  Description: Configure chest refill interval.
+- /hg centersize <size>
+  Description: Set the working arena's deathmatch center size (in-memory). Use `/hg arena save` to persist.
 
-- /hg start <arenaName>
-  Description: Start a match in the specified arena.
+- /hg graceperiod <timeInSeconds>
+  Description: Set the working arena's grace period (in-memory). Use `/hg arena save` to persist.
 
-- /hg stop <arenaName>
-  Description: Stop the running match in the arena and reset players.
+- /hg chestrefill <timeInSeconds>
+  Description: Set the working arena's chest-refill interval (in-memory). Use `/hg arena save` to persist.
 
-Player Commands (permission: HungerGames.player)
+- /hg start [arenaName]
+  Description: Start a match. If no arenaName is provided the currently loaded working arena id will be used (if any). This command affects runtime game state and does not modify arena persistence.
+
+- /hg stop [arenaName]
+  Description: Stop the running match. If no arenaName is provided the currently loaded working arena id will be used (if any).
+
+Player Commands (no permission required)
 - /hg join <arenaName>
   Description: Join the specified arena lobby.
 
@@ -46,14 +57,12 @@ Player Commands (permission: HungerGames.player)
   Description: Leave your current arena and return to the lobby.
 
 - /hg stats [player]
-  Description: Display kills/deaths/wins/losses for a player or yourself.
+  Description: Display kills/deaths/wins/losses for a player or yourself (match-scoped; not persisted across restarts).
 
 Notes
-- Tab completion should suggest arena names for commands that take <arenaName>.
-- Admin commands should provide clear error messages when arguments are missing or invalid.
-- All commands should be thoroughly documented in Javadocs in the source files.
+- Tab completion is disabled for now. All subcommands will be listed by `/hg`.
+- Admin commands provide clear error messages when arguments are missing or invalid and instruct admins to load/save working arenas as necessary.
 
 Next steps
-- Implement manager hooks (ArenaManager, GameManager, StatsManager) and wire commands to them.
-- Add unit tests for parsing utilities and tab-completion helpers.
-
+- Update docs/ARCHITECTURE.md and docs/TODO.md to reflect the working-arena semantics and the need for admins to run `/hg arena save` to persist changes.
+- Add example sequences in DEVELOPMENT_GUIDE.md to show a typical edit workflow (create -> addspawn -> set values -> save).
