@@ -3,9 +3,15 @@ package io.github.KennedySovine.hungerGames.utils;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.World;
+import org.bukkit.util.Vector;
 
 /**
  * Utility methods for serializing/deserializing Location objects to/from strings.
+ *
+ * Notes:
+ * - serialize(Location) and deserialize(String) work with a world-qualified CSV.
+ * - serializeRelative(Location center, Location loc) stores offsets (dx,dy,dz,dyaw,dpitch) relative to a center.
+ * - deserializeRelative supports both orders via a small overload for convenience.
  */
 public final class LocationUtils {
 
@@ -62,6 +68,9 @@ public final class LocationUtils {
      * Deserialize a relative-offset string using the provided center as the
      * origin. The string must be in the form produced by serializeRelative.
      * Returns null on parse error.
+     *
+     * @param center center location (provides world and base coords)
+     * @param s      relative string produced by serializeRelative
      */
     public static Location deserializeRelative(Location center, String s) {
         if (center == null || s == null || s.isEmpty()) return null;
@@ -80,5 +89,20 @@ public final class LocationUtils {
         } catch (NumberFormatException ex) {
             return null;
         }
+    }
+
+    /**
+     * Convenience overload: accept (String relative, Location center) order.
+     */
+    public static Location deserializeRelative(String s, Location center) {
+        return deserializeRelative(center, s);
+    }
+
+    /**
+     * Return the vector from a -> b (b - a).
+     */
+    public static Vector toVector(Location a, Location b) {
+        if (a == null || b == null) return null;
+        return new Vector(b.getX() - a.getX(), b.getY() - a.getY(), b.getZ() - a.getZ());
     }
 }
