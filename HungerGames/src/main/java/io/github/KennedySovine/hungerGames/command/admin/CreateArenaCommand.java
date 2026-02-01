@@ -1,16 +1,17 @@
 package io.github.KennedySovine.hungerGames.command.admin;
 
+import io.github.KennedySovine.hungerGames.HungerGames;
+import io.github.KennedySovine.hungerGames.arena.Arena;
+import io.github.KennedySovine.hungerGames.arena.ArenaManager;
 import io.github.KennedySovine.hungerGames.command.AbstractSubCommand;
 import org.bukkit.command.CommandSender;
-import java.util.Collections;
-import java.util.List;
+import org.bukkit.plugin.java.JavaPlugin;
 
 /**
  * /hg arena create <arenaName>
  *
- * Skeleton: validate inputs and call ArenaManager.createArena(arenaName).
- * This file intentionally contains only the command contract and Javadoc.
- * Implementation should persist the new arena to arenas.yml via ArenaManager.
+ * Creates a new arena id and display name (display name is optional; when not
+ * provided the id will be used). Persists arenas.yml via ArenaManager.saveArenas().
  *
  * Permission: HungerGames.admin
  */
@@ -23,7 +24,7 @@ public class CreateArenaCommand extends AbstractSubCommand {
 
     @Override
     public String usage() {
-        return "/hg arena create <arenaName>";
+        return "/hg arena create <arenaName> [displayName]";
     }
 
     @Override
@@ -33,14 +34,24 @@ public class CreateArenaCommand extends AbstractSubCommand {
 
     @Override
     public boolean execute(CommandSender sender, String[] args) {
-        // TODO: validate args length, normalize arena name, call ArenaManager.createArena
-        sender.sendMessage("[HG] This is a skeleton CreateArenaCommand. Implement logic to create and persist arenas.");
+        if (args.length < 1) {
+            sender.sendMessage("&cUsage: " + usage());
+            return true;
+        }
+        String id = args[0];
+        String display = (args.length >= 2) ? String.join(" ", java.util.Arrays.copyOfRange(args, 1, args.length)) : id;
+
+        HungerGames plugin = JavaPlugin.getPlugin(HungerGames.class);
+        ArenaManager mgr = plugin.getArenaManager();
+
+        Arena created = mgr.createArena(id, display);
+        if (created == null) {
+            sender.sendMessage("&cAn arena with id '" + id + "' already exists.");
+            return true;
+        }
+
+        mgr.saveArenas();
+        sender.sendMessage("&aArena created: " + created.getId() + " (display: " + created.getDisplayName() + ")");
         return true;
     }
-
-    @Override
-    public List<String> tabComplete(CommandSender sender, String[] args) {
-        return Collections.emptyList();
-    }
 }
-

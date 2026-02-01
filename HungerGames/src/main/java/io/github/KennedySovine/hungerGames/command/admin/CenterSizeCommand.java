@@ -1,9 +1,12 @@
 package io.github.KennedySovine.hungerGames.command.admin;
 
+import io.github.KennedySovine.hungerGames.HungerGames;
+import io.github.KennedySovine.hungerGames.arena.Arena;
+import io.github.KennedySovine.hungerGames.arena.ArenaManager;
 import io.github.KennedySovine.hungerGames.command.AbstractSubCommand;
 import org.bukkit.command.CommandSender;
-import java.util.Collections;
-import java.util.List;
+
+import java.util.Optional;
 
 /**
  * /hg centersize <arenaName> <size>
@@ -32,13 +35,30 @@ public class CenterSizeCommand extends AbstractSubCommand {
 
     @Override
     public boolean execute(CommandSender sender, String[] args) {
-        sender.sendMessage("[HG] Skeleton CenterSizeCommand. Implement parsing and setting of center size.");
+        if (args.length < 2) {
+            sender.sendMessage("&cUsage: " + usage());
+            return true;
+        }
+        String arenaId = args[0];
+        Optional<Integer> sizeOpt = parseInt(sender, args[1]);
+        if (sizeOpt.isEmpty()) return true;
+        int size = sizeOpt.get();
+        if (size <= 0) {
+            sender.sendMessage("&cCenter size must be positive.");
+            return true;
+        }
+
+        HungerGames plugin = org.bukkit.plugin.java.JavaPlugin.getPlugin(HungerGames.class);
+        ArenaManager mgr = plugin.getArenaManager();
+        Optional<Arena> aOpt = mgr.getArena(arenaId);
+        if (aOpt.isEmpty()) {
+            sender.sendMessage("&cArena not found: " + arenaId);
+            return true;
+        }
+        Arena a = aOpt.get();
+        a.setCenterSize(size);
+        mgr.saveArenas();
+        sender.sendMessage("&aSet center size for arena " + arenaId + " to " + size);
         return true;
     }
-
-    @Override
-    public List<String> tabComplete(CommandSender sender, String[] args) {
-        return Collections.emptyList();
-    }
 }
-

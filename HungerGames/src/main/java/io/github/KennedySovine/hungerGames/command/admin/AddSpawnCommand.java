@@ -1,17 +1,19 @@
 package io.github.KennedySovine.hungerGames.command.admin;
 
+import io.github.KennedySovine.hungerGames.HungerGames;
+import io.github.KennedySovine.hungerGames.arena.ArenaManager;
 import io.github.KennedySovine.hungerGames.command.AbstractSubCommand;
 import org.bukkit.command.CommandSender;
-import java.util.Collections;
-import java.util.List;
+import org.bukkit.entity.Player;
+
+import java.util.Optional;
 
 /**
  * /hg arena addspawn <arenaName>
  *
- * Skeleton: expects to be executed by a player. Implementation should read
- * the player's current location and add it as a spawn point to the arena
- * via ArenaManager.addSpawnPoint(arenaId, location). Consider persisting
- * after adding.
+ * Adds the player's current location as a spawn point for the arena.
+ * Requires the arena to already have a lobby/center set (see data file or GUI).
+ * Persists arenas.yml via ArenaManager.saveArenas() on success.
  *
  * Permission: HungerGames.admin
  */
@@ -34,13 +36,26 @@ public class AddSpawnCommand extends AbstractSubCommand {
 
     @Override
     public boolean execute(CommandSender sender, String[] args) {
-        sender.sendMessage("[HG] Skeleton AddSpawnCommand. Implement player-only spawn saving logic.");
+        Optional<Player> pOpt = asPlayer(sender);
+        if (pOpt.isEmpty()) {
+            sender.sendMessage("&cThis command must be executed by a player.");
+            return true;
+        }
+        if (args.length < 1) {
+            sender.sendMessage("&cUsage: " + usage());
+            return true;
+        }
+        String arenaId = args[0];
+        HungerGames plugin = org.bukkit.plugin.java.JavaPlugin.getPlugin(HungerGames.class);
+        ArenaManager mgr = plugin.getArenaManager();
+
+        boolean added = mgr.addSpawnPoint(arenaId, pOpt.get().getLocation());
+        if (!added) {
+            sender.sendMessage("&cFailed to add spawn. Ensure the arena exists and its lobby/center location is set before adding spawns.");
+            return true;
+        }
+        mgr.saveArenas();
+        sender.sendMessage("&aSpawn added to arena: " + arenaId);
         return true;
     }
-
-    @Override
-    public List<String> tabComplete(CommandSender sender, String[] args) {
-        return Collections.emptyList();
-    }
 }
-

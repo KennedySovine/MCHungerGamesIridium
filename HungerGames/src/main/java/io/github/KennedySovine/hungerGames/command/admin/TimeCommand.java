@@ -1,17 +1,15 @@
 package io.github.KennedySovine.hungerGames.command.admin;
 
+import io.github.KennedySovine.hungerGames.HungerGames;
+import io.github.KennedySovine.hungerGames.arena.Arena;
+import io.github.KennedySovine.hungerGames.arena.ArenaManager;
 import io.github.KennedySovine.hungerGames.command.AbstractSubCommand;
 import org.bukkit.command.CommandSender;
-import java.util.Collections;
-import java.util.List;
+
+import java.util.Optional;
 
 /**
  * /hg time <arenaName> <timeInSeconds>
- *
- * Skeleton: set the game time before border shrink/deathmatch onset.
- * Persist the value on the arena object.
- *
- * Permission: HungerGames.admin
  */
 public class TimeCommand extends AbstractSubCommand {
 
@@ -32,13 +30,30 @@ public class TimeCommand extends AbstractSubCommand {
 
     @Override
     public boolean execute(CommandSender sender, String[] args) {
-        sender.sendMessage("[HG] Skeleton TimeCommand. Implement time parsing and set logic.");
+        if (args.length < 2) {
+            sender.sendMessage("&cUsage: " + usage());
+            return true;
+        }
+        String arenaId = args[0];
+        Optional<Integer> tOpt = parseInt(sender, args[1]);
+        if (tOpt.isEmpty()) return true;
+        int t = tOpt.get();
+        if (t < 0) {
+            sender.sendMessage("&cTime must be non-negative.");
+            return true;
+        }
+
+        HungerGames plugin = org.bukkit.plugin.java.JavaPlugin.getPlugin(HungerGames.class);
+        ArenaManager mgr = plugin.getArenaManager();
+        Optional<Arena> aOpt = mgr.getArena(arenaId);
+        if (aOpt.isEmpty()) {
+            sender.sendMessage("&cArena not found: " + arenaId);
+            return true;
+        }
+        Arena a = aOpt.get();
+        a.setTimeToShrinkSeconds(t);
+        mgr.saveArenas();
+        sender.sendMessage("&aSet time-to-shrink for arena " + arenaId + " to " + t + " seconds.");
         return true;
     }
-
-    @Override
-    public List<String> tabComplete(CommandSender sender, String[] args) {
-        return Collections.emptyList();
-    }
 }
-
