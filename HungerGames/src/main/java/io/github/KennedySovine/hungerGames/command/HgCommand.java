@@ -41,7 +41,7 @@ public class HgCommand implements CommandExecutor, TabCompleter {
     @Override
     public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
         if (args.length == 0) {
-            sendHelp(sender);
+            //sendHelp(sender);
             return true;
         }
 
@@ -50,7 +50,7 @@ public class HgCommand implements CommandExecutor, TabCompleter {
         SubCommand cmd = commands.get(resolved);
         if (cmd == null) {
             sender.sendMessage("&cUnknown subcommand: " + args[0]);
-            sendHelp(sender);
+            //sendHelp(sender);
             return true;
         }
 
