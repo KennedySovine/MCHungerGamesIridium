@@ -1,17 +1,19 @@
 package io.github.KennedySovine.hungerGames.command.admin;
 
+import io.github.KennedySovine.hungerGames.HungerGames;
+import io.github.KennedySovine.hungerGames.arena.ArenaManager;
+import io.github.KennedySovine.hungerGames.game.GameManager;
 import io.github.KennedySovine.hungerGames.command.AbstractSubCommand;
 import org.bukkit.command.CommandSender;
-import java.util.Collections;
-import java.util.List;
+import org.bukkit.plugin.java.JavaPlugin;
+
+import java.util.Optional;
 
 /**
- * /hg start <arenaName>
+ * /hg start
  *
- * Skeleton: request GameManager.startGame(arenaId). Start should validate
- * that the arena exists and is not already running.
- *
- * Permission: HungerGames.admin
+ * Starts a match using the currently loaded working arena. No arena id may be
+ * supplied; to start a different arena, first use '/hg arena load <id>'.
  */
 public class StartCommand extends AbstractSubCommand {
 
@@ -22,7 +24,7 @@ public class StartCommand extends AbstractSubCommand {
 
     @Override
     public String usage() {
-        return "/hg start <arenaName>";
+        return "/hg start";
     }
 
     @Override
@@ -30,15 +32,35 @@ public class StartCommand extends AbstractSubCommand {
         return "HungerGames.admin";
     }
 
+    /**
+     * Execute handler for start.
+     *
+     * Parameters:
+     * - sender: the command issuer
+     * - args: none expected
+     *
+     * Behavior:
+     * - Requires permission: HungerGames.admin
+     * - Starts the running game for the currently loaded working arena.
+     */
     @Override
     public boolean execute(CommandSender sender, String[] args) {
-        sender.sendMessage("[HG] Skeleton StartCommand. Invoke GameManager.startGame(arenaId) here.");
+        if (args.length != 0) {
+            sender.sendMessage("&cUsage: " + usage() + " — do not provide an arena id. Load the desired arena with '/hg arena load <id>' first.");
+            return true;
+        }
+
+        ArenaManager mgr = JavaPlugin.getPlugin(HungerGames.class).getArenaManager();
+        Optional<io.github.KennedySovine.hungerGames.arena.Arena> wa = mgr.getWorkingArena();
+        if (wa.isEmpty()) {
+            sender.sendMessage("&cNo working arena loaded. Use '/hg arena load <arena>' or '/hg arena create <arena>' first.");
+            return true;
+        }
+        String arenaId = wa.get().getId();
+
+        GameManager gm = JavaPlugin.getPlugin(HungerGames.class).getGameManager();
+        gm.startGame(arenaId);
+        sender.sendMessage("&aRequested start for arena: " + arenaId);
         return true;
     }
-
-    @Override
-    public List<String> tabComplete(CommandSender sender, String[] args) {
-        return Collections.emptyList();
-    }
 }
-
