@@ -5,8 +5,8 @@ Task: update TODO to match the ordered plan (commands & managers first, then com
 Quick status checklist (work through top-to-bottom):
 - [ ] 1. Storage & utilities: `YamlStorage`, `LocationUtils`.
 - [ ] 2. Arena model: `Arena.java`.
-- [ ] 3. Arena persistence & manager: `ArenaManager.java`.
-- [ ] 4. Commands (admin + player): implement all listed command classes (commands-first).
+- [ ] 3. Arena persistence & manager: `ArenaManager.java` (includes working-arena placeholder APIs).
+- [ ] 4. Commands (admin + player): implement all listed command classes (commands-first). Commands that edit arenas should modify the working arena in-memory and not write to disk; use `/hg arena save` to persist.
 - [ ] 5. GameManager: minimal lifecycle hooks used by commands.
 - [ ] 6. Chest loot: `ChestLootManager` + `src/main/resources/config.yml` example.
 - [ ] 7. Combat system: `CombatManager` + `CombatListener` + connection handling.
@@ -46,7 +46,7 @@ PHASE 1 — Commands & Core Managers (highest priority)
 - Methods to implement:
   - String serialize(Location loc)  // include world name, x,y,z,yaw,pitch
   - Location deserialize(String s) // returns null if world missing
-  - String serializeRelative(Location spawn, Location center) // stores offset vector only (dx,dy,dz,yaw,pitch) along with maybe worldless marker
+  - String serializeRelative(Location spawn, Location center) // stores offset vector only (dx,dy,dz,yaw,pitch)
   - Location deserializeRelative(String relative, Location center) // reconstruct spawn as center + offset
   - Vector toVector(Location a, Location b) // optional helper
 - Global variables / fields:
@@ -85,12 +85,15 @@ PHASE 1 — Commands & Core Managers (highest priority)
 - Methods to implement:
   - void loadArenas()  // read arenas.yml and populate internal map
   - void saveArenas()  // write internal arenas to arenas.yml atomically
-  - Arena createArena(String id, CommandSender createdBy) // create minimal arena and return it
+  - Arena createArena(String id, CommandSender createdBy) // create minimal arena and return it (also persist the new master entry so a subsequent /hg arena save can fully persist edits)
   - boolean deleteArena(String id)
   - Arena getArena(String id)
   - List<String> listArenaIds()
-  - void addSpawn(String arenaId, String relativeSpawnString) // store as relative strings
+  - void addSpawn(String arenaId, String relativeSpawnString) // store as relative strings (master arena API)
   - String removeSpawn(String arenaId, int index) // return removed string
+  - boolean loadWorkingArena(String id) // copy master -> working
+  - Optional<Arena> getWorkingArena()
+  - void saveWorkingArena() // persist working -> master and save to disk
 - Fields / global variables:
   - Map<String, Arena> arenas  // id->Arena
   - JavaPlugin plugin  // reference
@@ -114,18 +117,19 @@ For each admin command implement the following methods (common contract):
   - String usage() // usage message
   - List<String> tabComplete(CommandSender sender, String[] args) // return empty list for now
 
-List of admin command classes to implement and the manager calls they must make:
-- `CreateArenaCommand` (execute -> plugin.getArenaManager().createArena(id, sender); plugin.getArenaManager().saveArenas();)
-- `DeleteArenaCommand` (execute -> delete and save)
-- `MaxPlayersCommand` (execute -> set maxPlayers in arena, validate, save)
-- `MinPlayersCommand` (execute -> set minPlayers in arena, validate, save)
-- `TimeCommand` (execute -> set chest/border time setting, save)
-- `CenterSizeCommand` (execute -> set centerSize, save)
-- `GracePeriodCommand` (execute -> set gracePeriodSeconds, save)
-- `ChestRefillCommand` (execute -> set chestRefillSeconds, save)
-- `AddSpawnCommand` (execute -> capture admin's location as center; compute relative spawn string via LocationUtils.serializeRelative(adminSpawn, center) and call arenaManager.addSpawn(...); save)
-- `RemoveSpawnCommand` (execute -> remove spawn by index and save)
-- `StopCommand` (execute -> plugin.getGameManager().stopGame(currentArena) )
+List of admin command classes to implement and the manager calls they must make (working-arena semantics):
+- `CreateArenaCommand` (execute -> plugin.getArenaManager().createArena(id, sender); plugin.getArenaManager().loadWorkingArena(id);)
+- `ArenaLoadCommand`   (execute -> plugin.getArenaManager().loadWorkingArena(id);)
+- `ArenaSaveCommand`   (execute -> plugin.getArenaManager().saveWorkingArena();)
+- `MaxPlayersCommand`  (execute -> modify workingArena.setMaxPlayers(number) — do NOT call saveArenas())
+- `MinPlayersCommand`  (execute -> modify workingArena.setMinPlayers(number) — do NOT call saveArenas())
+- `TimeCommand`        (execute -> modify workingArena.setTimeToShrinkSeconds(time) — do NOT call saveArenas())
+- `CenterSizeCommand`  (execute -> modify workingArena.setCenterSize(size) — do NOT call saveArenas())
+- `GracePeriodCommand` (execute -> modify workingArena.setGracePeriodSeconds(time) — do NOT call saveArenas())
+- `ChestRefillCommand` (execute -> modify workingArena.setChestRefillSeconds(time) — do NOT call saveArenas())
+- `AddSpawnCommand`    (execute -> add spawn to working arena via ArenaManager.addSpawnPointToWorking(location))
+- `RemoveSpawnCommand` (execute -> remove spawn from working arena via ArenaManager.removeSpawnPointFromWorking(index))
+- `StopCommand`        (execute -> plugin.getGameManager().stopGame(currentArena) )
 
 Player commands (no permission):
 - `JoinCommand` (execute -> plugin.getGameManager().join(player, arenaId))

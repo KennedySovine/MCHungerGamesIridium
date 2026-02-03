@@ -8,6 +8,7 @@ ArenaManager (io.github.KennedySovine.hungerGames.arena)
   - Load/save arenas from/to `arenas.yml`
   - Add/remove spawn points
   - Provide arena lookup (by id and by display name)
+  - Support a working (in-memory) arena placeholder used for admin edits (loadWorkingArena, saveWorkingArena)
 - Expected public API (skeleton):
   - `void loadArenas()`
   - `void saveArenas()`
@@ -15,6 +16,9 @@ ArenaManager (io.github.KennedySovine.hungerGames.arena)
   - `boolean deleteArena(String id)`
   - `Optional<Arena> getArena(String id)`
   - `List<String> getArenaNames()`
+  - `boolean loadWorkingArena(String id)`  // copy master -> working
+  - `Optional<Arena> getWorkingArena()`
+  - `void saveWorkingArena()`             // copy working -> master and persist
 
 GameManager (io.github.KennedySovine.hungerGames.game)
 - Responsibilities:

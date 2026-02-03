@@ -38,8 +38,16 @@ public class StatsManager {
         getStats(player).addLoss();
     }
 
+    /**
+     * Record a death with an optional reason. Delegates to addDeath for now.
+     * Kept to satisfy CombatManager calls which pass a reason string.
+     */
+    public void recordDeath(UUID player, String reason) {
+        // TODO: persist or log the reason if needed. For now, increment death counter.
+        addDeath(player);
+    }
+
     public void save() {
         // TODO: persist stats to stats.yml
     }
 }
-
