@@ -34,7 +34,7 @@ public class GuiCommand extends AbstractSubCommand {
         Player player = pOpt.get();
 
         ArenaEditorGui editor = new ArenaEditorGui();
-        editor.openFor(player);
+        editor.openEditor(player, null);
 
         return true;
     }
