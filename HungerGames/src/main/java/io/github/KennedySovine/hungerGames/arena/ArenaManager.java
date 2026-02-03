@@ -19,6 +19,10 @@ public class ArenaManager {
     private final HungerGames plugin;
     private final Map<String, Arena> arenas = new LinkedHashMap<>();
 
+    // Working (loaded) arena used as a placeholder for admin edits. This arena
+    // is kept in-memory until an explicit save is performed.
+    private Arena workingArena = null;
+
     public ArenaManager(HungerGames plugin) {
         this.plugin = plugin;
     }
@@ -149,6 +153,84 @@ public class ArenaManager {
         Arena a = o.get();
         if (index < 0 || index >= a.getSpawnOffsets().size()) return false;
         a.removeSpawn(index);
+        return true;
+    }
+
+    // --- Working (placeholder) arena APIs ---
+
+    /**
+     * Load the working arena by copying the master arena into a separate in-memory
+     * placeholder. Returns true if the arena was found and loaded.
+     */
+    public boolean loadWorkingArena(String id) {
+        Optional<Arena> o = getArena(id);
+        if (o.isEmpty()) return false;
+        Arena src = o.get();
+        Arena copy = new Arena(src.getId(), src.getDisplayName());
+        copy.setMinPlayers(src.getMinPlayers());
+        copy.setMaxPlayers(src.getMaxPlayers());
+        copy.setTimeToShrinkSeconds(src.getTimeToShrinkSeconds());
+        copy.setCenterSize(src.getCenterSize());
+        copy.setGracePeriodSeconds(src.getGracePeriodSeconds());
+        copy.setChestRefillSeconds(src.getChestRefillSeconds());
+        copy.setLobbyLocation(src.getLobbyLocation());
+        // copy spawn offsets
+        for (String s : src.getSpawnOffsets()) {
+            copy.addSpawnOffset(s);
+        }
+        this.workingArena = copy;
+        return true;
+    }
+
+    /**
+     * Return the working arena if one is loaded.
+     */
+    public Optional<Arena> getWorkingArena() {
+        return Optional.ofNullable(workingArena);
+    }
+
+    /**
+     * Persist the currently loaded working arena back into the master arenas map
+     * and save to disk. Throws IllegalStateException if no working arena is loaded
+     * or if the working arena's id does not exist in the master list.
+     */
+    public void saveWorkingArena() {
+        if (workingArena == null) throw new IllegalStateException("No working arena loaded");
+        String id = workingArena.getId();
+        if (!arenas.containsKey(id)) throw new IllegalStateException("Working arena id '" + id + "' is not present in master arenas list");
+        // Replace master arena with working copy
+        Arena copy = new Arena(workingArena.getId(), workingArena.getDisplayName());
+        copy.setMinPlayers(workingArena.getMinPlayers());
+        copy.setMaxPlayers(workingArena.getMaxPlayers());
+        copy.setTimeToShrinkSeconds(workingArena.getTimeToShrinkSeconds());
+        copy.setCenterSize(workingArena.getCenterSize());
+        copy.setGracePeriodSeconds(workingArena.getGracePeriodSeconds());
+        copy.setChestRefillSeconds(workingArena.getChestRefillSeconds());
+        copy.setLobbyLocation(workingArena.getLobbyLocation());
+        for (String s : workingArena.getSpawnOffsets()) copy.addSpawnOffset(s);
+        arenas.put(id, copy);
+        // Persist to disk
+        saveArenas();
+    }
+
+    /**
+     * Add a spawn point to the working arena (if loaded). Returns true on success.
+     */
+    public boolean addSpawnPointToWorking(Location loc) {
+        if (workingArena == null) return false;
+        Location center = workingArena.getLobbyLocation();
+        if (center == null) return false;
+        workingArena.addSpawnRelative(center, loc);
+        return true;
+    }
+
+    /**
+     * Remove a spawn point by index from the working arena. Returns true on success.
+     */
+    public boolean removeSpawnPointFromWorking(int index) {
+        if (workingArena == null) return false;
+        if (index < 0 || index >= workingArena.getSpawnOffsets().size()) return false;
+        workingArena.removeSpawn(index);
         return true;
     }
 }

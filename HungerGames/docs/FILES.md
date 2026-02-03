@@ -11,17 +11,19 @@ Commands (already present as skeletons)
 - src/main/java/io/github/KennedySovine/hungerGames/command/AbstractSubCommand.java
 
 Admin Subcommands (skeletons already created)
-- src/main/java/io/github/KennedySovine/hungerGames/command/admin/CreateArenaCommand.java
-- src/main/java/io/github/KennedySovine/hungerGames/command/admin/AddSpawnCommand.java
-- src/main/java/io/github/KennedySovine/hungerGames/command/admin/RemoveSpawnCommand.java
-- src/main/java/io/github/KennedySovine/hungerGames/command/admin/MaxPlayersCommand.java
-- src/main/java/io/github/KennedySovine/hungerGames/command/admin/MinPlayersCommand.java
-- src/main/java/io/github/KennedySovine/hungerGames/command/admin/TimeCommand.java
-- src/main/java/io/github/KennedySovine/hungerGames/command/admin/CenterSizeCommand.java
-- src/main/java/io/github/KennedySovine/hungerGames/command/admin/GracePeriodCommand.java
-- src/main/java/io/github/KennedySovine/hungerGames/command/admin/ChestRefillCommand.java
-- src/main/java/io/github/KennedySovine/hungerGames/command/admin/StartCommand.java
-- src/main/java/io/github/KennedySovine/hungerGames/command/admin/StopCommand.java
+- src/main/java/io/github/KennedySovine/hungerGames/command/admin/CreateArenaCommand.java  (creates master arena + loads it into working memory)
+- src/main/java/io/github/KennedySovine/hungerGames/command/admin/ArenaLoadCommand.java    (loads master -> working copy)
+- src/main/java/io/github/KennedySovine/hungerGames/command/admin/ArenaSaveCommand.java    (saves working -> master)
+- src/main/java/io/github/KennedySovine/hungerGames/command/admin/AddSpawnCommand.java     (adds spawn to working arena)
+- src/main/java/io/github/KennedySovine/hungerGames/command/admin/RemoveSpawnCommand.java  (removes spawn from working arena)
+- src/main/java/io/github/KennedySovine/hungerGames/command/admin/MaxPlayersCommand.java   (modifies working arena)
+- src/main/java/io/github/KennedySovine/hungerGames/command/admin/MinPlayersCommand.java   (modifies working arena)
+- src/main/java/io/github/KennedySovine/hungerGames/command/admin/TimeCommand.java         (modifies working arena)
+- src/main/java/io/github/KennedySovine/hungerGames/command/admin/CenterSizeCommand.java   (modifies working arena)
+- src/main/java/io/github/KennedySovine/hungerGames/command/admin/GracePeriodCommand.java  (modifies working arena)
+- src/main/java/io/github/KennedySovine/hungerGames/command/admin/ChestRefillCommand.java  (modifies working arena)
+- src/main/java/io/github/KennedySovine/hungerGames/command/admin/StartCommand.java        (runtime game control)
+- src/main/java/io/github/KennedySovine/hungerGames/command/admin/StopCommand.java         (runtime game control)
 
 Player Subcommands (skeletons already created)
 - src/main/java/io/github/KennedySovine/hungerGames/command/player/JoinCommand.java
@@ -30,7 +32,7 @@ Player Subcommands (skeletons already created)
 
 Managers (create skeletons with Javadoc)
 - src/main/java/io/github/KennedySovine/hungerGames/arena/Arena.java
-- src/main/java/io/github/KennedySovine/hungerGames/arena/ArenaManager.java
+- src/main/java/io/github/KennedySovine/hungerGames/arena/ArenaManager.java (supports a working arena placeholder and APIs to load/save it)
 - src/main/java/io/github/KennedySovine/hungerGames/game/GameManager.java
 - src/main/java/io/github/KennedySovine/hungerGames/game/GameState.java
 - src/main/java/io/github/KennedySovine/hungerGames/combat/CombatManager.java
