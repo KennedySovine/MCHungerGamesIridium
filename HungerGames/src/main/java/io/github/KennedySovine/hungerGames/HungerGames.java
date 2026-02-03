@@ -2,6 +2,7 @@ package io.github.KennedySovine.hungerGames;
 
 import io.github.KennedySovine.hungerGames.arena.ArenaManager;
 import io.github.KennedySovine.hungerGames.combat.CombatManager;
+import io.github.KennedySovine.hungerGames.command.SubCommand;
 import io.github.KennedySovine.hungerGames.game.GameManager;
 import io.github.KennedySovine.hungerGames.storage.YamlStorage;
 import io.github.KennedySovine.hungerGames.stats.StatsManager;
@@ -41,6 +42,7 @@ public final class HungerGames extends JavaPlugin {
         hgCommand.registerSubCommand("minplayers", new MinPlayersCommand());
         hgCommand.registerSubCommand("time", new TimeCommand());
         hgCommand.registerSubCommand("centersize", new CenterSizeCommand());
+        hgCommand.registerSubCommand("gui", new GuiCommand());
         hgCommand.registerSubCommand("graceperiod", new GracePeriodCommand());
         hgCommand.registerSubCommand("chestrefill", new ChestRefillCommand());
         hgCommand.registerSubCommand("start", new StartCommand());

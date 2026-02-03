@@ -1,39 +1,41 @@
 package io.github.KennedySovine.hungerGames.gui;
 
+import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.Inventory;
+import org.bukkit.inventory.InventoryHolder;
 
-/**
- * Skeleton for the Arena Editor GUI.
- *
- * Responsibilities:
- * - Build inventory menus for editing arena properties
- * - Handle clicks and delegate to ArenaManager (when implemented)
- * - Provide a method to give the spawn-stick to admins
- */
 public class ArenaEditorGui {
 
-    /**
-     * Open the main arena editor GUI for the given player and arena id.
-     */
-    public void openFor(Player player, String arenaId) {
-        // TODO: implement inventory creation and open
+    public static final String SPAWN_STICK_KEY_NAME = "hg_arena_id";
+
+    public void openFor(Player player) {
+        //
+        Inventory gui = Bukkit.createInventory(new EditorHolder(null), 9, createEditorTitle());
+        player.openInventory(gui);
     }
 
-    /**
-     * Build the Inventory instance representing the main editor menu.
-     */
     public Inventory buildMainInventory(String arenaId) {
-        // TODO: create and return Inventory
-        return null;
+        return Bukkit.createInventory(new EditorHolder(arenaId), 27, createEditorTitle());
     }
 
-    /**
-     * Give the admin a spawn-stick that is associated with the arenaId.
-     * The spawn-stick should use PersistentDataContainer to store arenaId.
-     */
     public void giveSpawnStick(Player admin, String arenaId) {
-        // TODO: create an ItemStack (STICK) with PDC metadata and give to player
+    }
+
+    public static class EditorHolder implements InventoryHolder {
+        private final String arenaId;
+
+        public EditorHolder(String arenaId) {
+            this.arenaId = arenaId;
+        }
+
+        public String getArenaId() {
+            return arenaId;
+        }
+
+        @Override
+        public Inventory getInventory() {
+            return null;
+        }
     }
 }
-
