@@ -31,6 +31,9 @@ public final class HungerGames extends JavaPlugin {
         this.combatManager = new CombatManager(this);
         this.statsManager = new StatsManager(this);
 
+        // Load arenas from disk
+        arenaManager.loadArenas();
+
         this.hgCommand = new HgCommand(this);
 
         // Register subcommand skeletons (these classes are lightweight stubs)

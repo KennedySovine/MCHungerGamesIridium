@@ -4,6 +4,8 @@ import io.github.KennedySovine.hungerGames.HungerGames;
 import io.github.KennedySovine.hungerGames.arena.Arena;
 import io.github.KennedySovine.hungerGames.arena.ArenaManager;
 import io.github.KennedySovine.hungerGames.command.AbstractSubCommand;
+import io.github.KennedySovine.hungerGames.arena.Arena;
+import io.github.KennedySovine.hungerGames.arena.ArenaManager;
 import org.bukkit.command.CommandSender;
 import org.bukkit.plugin.java.JavaPlugin;
 
