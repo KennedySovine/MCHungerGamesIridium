@@ -1,6 +1,5 @@
 package io.github.KennedySovine.hungerGames.utils;
 
-import org.bukkit.Bukkit;
 import org.bukkit.Color;
 import org.bukkit.Location;
 import org.bukkit.Particle;
@@ -12,65 +11,71 @@ import org.bukkit.Particle.DustOptions;
 
 /**
  * Small utility to display vertical beacon-like particle effects at a location.
- * The implementation draws a column of REDSTONE dust up/down the world height
- * and a burst at the exact Y of the location to mark the spawn/center.
+ * The implementation draws a column of END_ROD particles from the spawn Y up to
+ * the world max height on a repeating task and a small colored dust accent at
+ * the exact Y of the spawn/center. The task runs until cancelled by the caller.
  */
 public final class ParticleUtils {
     private ParticleUtils() {}
 
     public static BukkitTask showSpawnBeacon(JavaPlugin plugin, Location loc) {
-        return showVerticalBeacon(plugin, loc, Color.fromRGB(255,255,255), 6);
+        // white beam using END_ROD
+        return showPersistentVerticalBeam(plugin, loc, null);
     }
 
     public static BukkitTask showCenterBeacon(JavaPlugin plugin, Location loc) {
-        return showVerticalBeacon(plugin, loc, Color.fromRGB(255,224,0), 8);
+        // center uses a yellow accent plus the same END_ROD beam
+        return showPersistentVerticalBeam(plugin, loc, Color.fromRGB(255, 224, 0));
     }
 
-    public static BukkitTask showVerticalBeacon(JavaPlugin plugin, Location loc, Color color, int durationSeconds) {
+    /**
+     * Builds a persistent repeating task that spawns a vertical beam of END_ROD
+     * particles from the provided location's Y up to the world max height every 5 ticks.
+     * If 'accentColor' is non-null, a colored REDSTONE dust is spawned at the exact location Y.
+     * Returns the BukkitTask so callers can cancel it to stop the beam.
+     */
+    public static BukkitTask showPersistentVerticalBeam(JavaPlugin plugin, Location loc, Color accentColor) {
         if (loc == null || loc.getWorld() == null) return null;
         World world = loc.getWorld();
-        final double x = loc.getX();
-        final double z = loc.getZ();
-        final double centerY = loc.getY();
-        final int minY = world.getMinHeight();
+        final double x = loc.getX() + 0.5;
+        final double z = loc.getZ() + 0.5;
+        final int startY = loc.getBlockY();
         final int maxY = world.getMaxHeight();
-        final DustOptions dust = new DustOptions(color, 1.0f);
-        final int stepBlocks = 2; // sample every 2 blocks to reduce load
-        final long intervalTicks = 2L; // run every 2 ticks
-        final int iterations = Math.max(1, (durationSeconds * 20) / (int)intervalTicks);
+        final DustOptions dust = (accentColor != null) ? new DustOptions(accentColor, 1.0f) : null;
 
-        BukkitRunnable runnable = new BukkitRunnable() {
-            int count = 0;
+        BukkitRunnable task = new BukkitRunnable() {
             @Override
             public void run() {
-                if (count++ >= iterations) {
-                    cancel();
-                    return;
-                }
-                // vertical column
-                for (int y = minY; y <= maxY; y += stepBlocks) {
-                    Location p = new Location(world, x, y, z);
+                // vertical beam using END_ROD
+                for (int y = startY; y < maxY; y++) {
+                    Location particleLoc = new Location(world, x, y, z);
                     try {
-                        world.spawnParticle(Particle.valueOf("REDSTONE"), p, 1, 0.0, 0.0, 0.0, 0.0, dust);
-                    } catch (IllegalArgumentException ex) {
-                        // fallback: try generic particle names if available, else skip
-                        try { world.spawnParticle(Particle.valueOf("SMOKE_NORMAL"), p, 1, 0.0, 0.0, 0.0); } catch (Exception ignore) {}
+                        world.spawnParticle(Particle.END_ROD, particleLoc, 1, 0, 0, 0, 0);
+                    } catch (Throwable t) {
+                        // fail-safe: ignore
                     }
                 }
+
                 // accent at the exact spawn Y
-                Location center = new Location(world, x, centerY, z);
-                try {
-                    world.spawnParticle(Particle.valueOf("SPELL_WITCH"), center, 40, 0.5, 0.5, 0.5, 0.02);
-                } catch (IllegalArgumentException ex) {
-                    try { world.spawnParticle(Particle.valueOf("SPELL"), center, 40, 0.5, 0.5, 0.5); } catch (Exception ignore) {}
-                }
-                try {
-                    world.spawnParticle(Particle.valueOf("CAMPFIRE_COSY_SMOKE"), center, 8, 0.2, 0.2, 0.2, 0.0);
-                } catch (IllegalArgumentException ex) {
-                    // ignore fallback
+                Location accentLoc = new Location(world, x, startY + 0.5, z);
+                if (dust != null) {
+                    try {
+                        world.spawnParticle(Particle.valueOf("REDSTONE"), accentLoc, 1, 0, 0, 0, 0, dust);
+                    } catch (Throwable t) {
+                        try { world.spawnParticle(Particle.valueOf("SPELL"), accentLoc, 6, 0.2, 0.2, 0.2); } catch (Throwable ignore) {}
+                    }
+                } else {
+                    // small burst to mark the spawn Y
+                    try {
+                        world.spawnParticle(Particle.CAMPFIRE_COSY_SMOKE, accentLoc, 6, 0.2, 0.2, 0.2, 0);
+                    } catch (Throwable t) {
+                        // ignore
+                    }
                 }
             }
         };
-        return runnable.runTaskTimer(plugin, 0L, intervalTicks);
+
+        // run every 5 ticks (as per your example)
+        return task.runTaskTimer(plugin, 0L, 5L);
     }
 }
