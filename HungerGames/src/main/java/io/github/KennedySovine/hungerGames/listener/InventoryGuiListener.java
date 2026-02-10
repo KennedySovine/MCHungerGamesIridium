@@ -15,6 +15,9 @@ import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 
 import java.util.Optional;
+import java.util.Locale;
+import java.util.regex.Pattern;
+import io.github.KennedySovine.hungerGames.gui.AnvilPrompt;
 
 /**
  * Listener for GUI inventories. Prevents item movement and delegates actions
@@ -111,8 +114,38 @@ public class InventoryGuiListener implements Listener {
                 ArenaListGui.openFor(clicker);
                 return;
             case "Create Arena":
-                // Creating requires a name; instruct the admin to run the command in chat.
-                MessageUtils.send(clicker, "&eTo create a new arena run: &7/hg arena create <arenaId> [displayName]");
+                // Open an anvil prompt so the admin can type an arena id (and optional display name separated by a space)
+                AnvilPrompt.open(clicker, "Create Arena - enter id [displayName]", "my_arena Display Name", text -> {
+                    // parse id and optional display name
+                    String[] parts = text.split(" ", 2);
+                    String rawId = parts[0].trim();
+                    String id = rawId.toLowerCase(Locale.ROOT);
+                    String display = parts.length > 1 ? parts[1].trim() : id;
+
+                    // Validate id: only lowercase letters, numbers, '_' and '-' allowed; length 1-64
+                    Pattern valid = Pattern.compile("^[a-z0-9_-]{1,64}$");
+                    if (!valid.matcher(id).matches()) {
+                        MessageUtils.send(clicker, "&cInvalid arena id. Use 1-64 chars: lowercase a-z, digits, '-' or '_'.");
+                        return;
+                    }
+
+                    // Create arena and persist; createArena normalizes id internally but we pass lowercase id
+                    boolean ok = HungerGames.getPlugin(HungerGames.class).getArenaManager().createArena(id, display) != null;
+                    if (!ok) {
+                        MessageUtils.send(clicker, "&cArena with id '" + id + "' already exists.");
+                        return;
+                    }
+                    // Save arenas to disk, load into working, set center to player's location, refresh beacons
+                    HungerGames.getPlugin(HungerGames.class).getArenaManager().saveArenas();
+                    HungerGames.getPlugin(HungerGames.class).getArenaManager().loadWorkingArena(id);
+                    HungerGames.getPlugin(HungerGames.class).getArenaManager().getWorkingArena().ifPresent(a -> {
+                        a.setLobbyLocation(clicker.getLocation());
+                        String wid = a.getId();
+                        HungerGames.getPlugin(HungerGames.class).getParticleManager().showCenter(wid, clicker.getLocation());
+                        HungerGames.getPlugin(HungerGames.class).getParticleManager().refreshAllSpawns(wid, a);
+                    });
+                    MessageUtils.send(clicker, "&aCreated and loaded arena: " + id);
+                });
                 return;
             default:
                 // unknown item, ignore
