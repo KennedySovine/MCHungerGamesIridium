@@ -3,6 +3,7 @@ package io.github.KennedySovine.hungerGames.combat;
 import io.github.KennedySovine.hungerGames.HungerGames;
 import io.github.KennedySovine.hungerGames.game.GameManager;
 import io.github.KennedySovine.hungerGames.stats.StatsManager;
+import io.github.KennedySovine.hungerGames.utils.MessageUtils;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.scheduler.BukkitTask;
@@ -108,7 +109,7 @@ public class CombatManager {
                 // Notify player if they're considered dead (gm will handle sending death UI if needed)
                 Player p = Bukkit.getPlayer(playerUuid);
                 if (p != null) {
-                    p.sendMessage("Welcome back. Your reconnect grace was applied.");
+                    MessageUtils.send(p, "Welcome back. Your reconnect grace was applied.");
                 }
             });
         }

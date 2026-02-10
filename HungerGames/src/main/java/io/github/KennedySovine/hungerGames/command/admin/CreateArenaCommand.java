@@ -4,8 +4,7 @@ import io.github.KennedySovine.hungerGames.HungerGames;
 import io.github.KennedySovine.hungerGames.arena.Arena;
 import io.github.KennedySovine.hungerGames.arena.ArenaManager;
 import io.github.KennedySovine.hungerGames.command.AbstractSubCommand;
-import io.github.KennedySovine.hungerGames.arena.Arena;
-import io.github.KennedySovine.hungerGames.arena.ArenaManager;
+import io.github.KennedySovine.hungerGames.utils.MessageUtils;
 import org.bukkit.command.CommandSender;
 import org.bukkit.plugin.java.JavaPlugin;
 
@@ -49,7 +48,7 @@ public class CreateArenaCommand extends AbstractSubCommand {
     @Override
     public boolean execute(CommandSender sender, String[] args) {
         if (args.length < 1) {
-            sender.sendMessage("&cUsage: " + usage());
+            MessageUtils.send(sender, "&cUsage: " + usage());
             return true;
         }
         String id = args[0];
@@ -58,7 +57,7 @@ public class CreateArenaCommand extends AbstractSubCommand {
         ArenaManager mgr = JavaPlugin.getPlugin(HungerGames.class).getArenaManager();
         Arena created = mgr.createArena(id, display);
         if (created == null) {
-            sender.sendMessage("&cAn arena with id '" + id + "' already exists.");
+            MessageUtils.send(sender, "&cAn arena with id '" + id + "' already exists.");
             return true;
         }
         // Persist new arena to disk so it exists in master list
@@ -66,7 +65,7 @@ public class CreateArenaCommand extends AbstractSubCommand {
         // Load into working placeholder for further edits
         mgr.loadWorkingArena(created.getId());
 
-        sender.sendMessage("&aArena created and loaded for editing: " + created.getId());
+        MessageUtils.send(sender, "&aArena created and loaded for editing: " + created.getId());
         return true;
     }
 }

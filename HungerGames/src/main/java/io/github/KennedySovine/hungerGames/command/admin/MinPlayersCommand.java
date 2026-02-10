@@ -4,6 +4,7 @@ import io.github.KennedySovine.hungerGames.HungerGames;
 import io.github.KennedySovine.hungerGames.arena.Arena;
 import io.github.KennedySovine.hungerGames.arena.ArenaManager;
 import io.github.KennedySovine.hungerGames.command.AbstractSubCommand;
+import io.github.KennedySovine.hungerGames.utils.MessageUtils;
 import org.bukkit.command.CommandSender;
 import org.bukkit.plugin.java.JavaPlugin;
 
@@ -41,14 +42,14 @@ public class MinPlayersCommand extends AbstractSubCommand {
     @Override
     public boolean execute(CommandSender sender, String[] args) {
         if (args.length != 1) {
-            sender.sendMessage("&cUsage: " + usage() + " — this command only accepts a single <number> and operates on the loaded working arena.");
+            MessageUtils.send(sender, "&cUsage: " + usage() + " — this command only accepts a single <number> and operates on the loaded working arena.");
             return true;
         }
 
         ArenaManager mgr = JavaPlugin.getPlugin(HungerGames.class).getArenaManager();
         Optional<Arena> workingOpt = mgr.getWorkingArena();
         if (workingOpt.isEmpty()) {
-            sender.sendMessage("&cNo working arena loaded. Use '/hg arena load <arena>' or '/hg arena create <arena>' first.");
+            MessageUtils.send(sender, "&cNo working arena loaded. Use '/hg arena load <arena>' or '/hg arena create <arena>' first.");
             return true;
         }
         Arena working = workingOpt.get();
@@ -57,16 +58,16 @@ public class MinPlayersCommand extends AbstractSubCommand {
         if (numOpt.isEmpty()) return true;
         int num = numOpt.get();
         if (num <= 0) {
-            sender.sendMessage("&cMin players must be positive.");
+            MessageUtils.send(sender, "&cMin players must be positive.");
             return true;
         }
 
         if (num > working.getMaxPlayers()) {
-            sender.sendMessage("&cMin players cannot be greater than current max players (" + working.getMaxPlayers() + ").");
+            MessageUtils.send(sender, "&cMin players cannot be greater than current max players (" + working.getMaxPlayers() + ").");
             return true;
         }
         working.setMinPlayers(num);
-        sender.sendMessage("&aSet min players for working arena " + working.getId() + " to " + num + " (in-memory). Use '/hg arena save' to persist.");
+        MessageUtils.send(sender, "&aSet min players for working arena " + working.getId() + " to " + num + " (in-memory). Use '/hg arena save' to persist.");
         return true;
     }
 }

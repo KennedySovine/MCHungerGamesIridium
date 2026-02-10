@@ -2,6 +2,7 @@ package io.github.KennedySovine.hungerGames.command.admin;
 
 import io.github.KennedySovine.hungerGames.arena.ArenaManager;
 import io.github.KennedySovine.hungerGames.command.AbstractSubCommand;
+import io.github.KennedySovine.hungerGames.utils.MessageUtils;
 import org.bukkit.command.CommandSender;
 import org.bukkit.plugin.java.JavaPlugin;
 
@@ -46,9 +47,9 @@ public class ArenaSaveCommand extends AbstractSubCommand {
         ArenaManager mgr = JavaPlugin.getPlugin(io.github.KennedySovine.hungerGames.HungerGames.class).getArenaManager();
         try {
             mgr.saveWorkingArena();
-            sender.sendMessage("&aWorking arena persisted to disk.");
+            MessageUtils.send(sender, "&aWorking arena persisted to disk.");
         } catch (IllegalStateException ex) {
-            sender.sendMessage("&cCannot save: " + ex.getMessage());
+            MessageUtils.send(sender, "&cCannot save: " + ex.getMessage());
         }
         return true;
     }

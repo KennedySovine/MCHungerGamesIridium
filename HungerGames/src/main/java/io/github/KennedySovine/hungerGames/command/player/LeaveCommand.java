@@ -1,6 +1,7 @@
 package io.github.KennedySovine.hungerGames.command.player;
 
 import io.github.KennedySovine.hungerGames.command.AbstractSubCommand;
+import io.github.KennedySovine.hungerGames.utils.MessageUtils;
 import org.bukkit.command.CommandSender;
 import java.util.Collections;
 import java.util.List;
@@ -32,7 +33,7 @@ public class LeaveCommand extends AbstractSubCommand {
 
     @Override
     public boolean execute(CommandSender sender, String[] args) {
-        sender.sendMessage("[HG] Skeleton LeaveCommand. Implement leave logic and inventory restore here.");
+        MessageUtils.send(sender, "[HG] Skeleton LeaveCommand. Implement leave logic and inventory restore here.");
         return true;
     }
 
@@ -41,4 +42,3 @@ public class LeaveCommand extends AbstractSubCommand {
         return Collections.emptyList();
     }
 }
-

@@ -1,11 +1,10 @@
 package io.github.KennedySovine.hungerGames.command.admin;
 
 import io.github.KennedySovine.hungerGames.HungerGames;
-import io.github.KennedySovine.hungerGames.arena.Arena;
-import io.github.KennedySovine.hungerGames.arena.ArenaManager;
 import io.github.KennedySovine.hungerGames.command.AbstractSubCommand;
+import io.github.KennedySovine.hungerGames.arena.Arena;
+import io.github.KennedySovine.hungerGames.utils.MessageUtils;
 import org.bukkit.command.CommandSender;
-import org.bukkit.plugin.java.JavaPlugin;
 
 import java.util.Optional;
 
@@ -36,42 +35,32 @@ public class CenterSizeCommand extends AbstractSubCommand {
     }
 
     /**
-     * Execute handler for center size.
-     *
+     * Execute: set center size on the working arena.
      * Parameters:
-     * - sender: the command issuer
-     * - args: args[0] = desired center size (integer)
-     *
-     * Behavior:
-     * - Requires permission: HungerGames.admin
-     * - Updates the working arena's centerSize (in-memory).
-     * - Does NOT persist; use `/hg arena save` to persist.
+     * - sender: command issuer
+     * - args[0]: size (integer)
      */
     @Override
     public boolean execute(CommandSender sender, String[] args) {
         if (args.length != 1) {
-            sender.sendMessage("&cUsage: " + usage() + " — this command only accepts a single <size> and operates on the loaded working arena.");
+            MessageUtils.send(sender, "&cUsage: " + usage() + " — this command only accepts a single <size> and operates on the loaded working arena.");
             return true;
         }
-
-        ArenaManager mgr = JavaPlugin.getPlugin(HungerGames.class).getArenaManager();
-        Optional<Arena> workingOpt = mgr.getWorkingArena();
-        if (workingOpt.isEmpty()) {
-            sender.sendMessage("&cNo working arena loaded. Use '/hg arena load <arena>' or '/hg arena create <arena>' first.");
+        Optional<Arena> opt = HungerGames.getPlugin(HungerGames.class).getArenaManager().getWorkingArena();
+        if (opt.isEmpty()) {
+            MessageUtils.send(sender, "&cNo working arena loaded. Use '/hg arena load <arena>' or '/hg arena create <arena>' first.");
             return true;
         }
-        Arena working = workingOpt.get();
-
-        Optional<Integer> sizeOpt = parseInt(sender, args[0]);
-        if (sizeOpt.isEmpty()) return true;
-        int size = sizeOpt.get();
+        Optional<Integer> maybe = parseInt(sender, args[0]);
+        if (maybe.isEmpty()) return true;
+        int size = maybe.get();
         if (size <= 0) {
-            sender.sendMessage("&cCenter size must be positive.");
+            MessageUtils.send(sender, "&cCenter size must be positive.");
             return true;
         }
-
+        Arena working = opt.get();
         working.setCenterSize(size);
-        sender.sendMessage("&aSet center size for working arena " + working.getId() + " to " + size + " (in-memory). Use '/hg arena save' to persist.");
+        MessageUtils.send(sender, "&aSet center size for working arena " + working.getId() + " to " + size + " (in-memory). Use '/hg arena save' to persist.");
         return true;
     }
 }

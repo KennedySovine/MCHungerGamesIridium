@@ -3,6 +3,7 @@ package io.github.KennedySovine.hungerGames.command;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.bukkit.Bukkit;
+import io.github.KennedySovine.hungerGames.utils.MessageUtils;
 
 import java.util.Collections;
 import java.util.List;
@@ -31,6 +32,7 @@ public abstract class AbstractSubCommand implements SubCommand {
         if (sender instanceof Player) {
             return Optional.of((Player) sender);
         }
+        MessageUtils.send(sender, "&cThis command must be executed by a player.");
         return Optional.empty();
     }
 
@@ -43,7 +45,7 @@ public abstract class AbstractSubCommand implements SubCommand {
         try {
             return Optional.of(Integer.parseInt(token));
         } catch (NumberFormatException ex) {
-            sender.sendMessage("&cInvalid number: " + token);
+            MessageUtils.send(sender, "&cInvalid number: " + token);
             return Optional.empty();
         }
     }
@@ -57,4 +59,3 @@ public abstract class AbstractSubCommand implements SubCommand {
         return Collections.emptyList();
     }
 }
-
