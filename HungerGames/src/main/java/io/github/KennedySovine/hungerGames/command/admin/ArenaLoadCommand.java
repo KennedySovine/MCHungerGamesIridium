@@ -63,6 +63,8 @@ public class ArenaLoadCommand extends AbstractSubCommand {
             MessageUtils.send(sender, "&aLoaded arena into working memory: " + arenaId + " and set center to your current location.");
             // show center beacon (yellow) and refresh spawn beacons
             String wid = mgr.getWorkingArena().map(a -> a.getId()).orElse("");
+            // clear any previous beacons for a clean reset then re-show
+            HungerGames.getPlugin(HungerGames.class).getParticleManager().clearAllForArena(wid);
             HungerGames.getPlugin(HungerGames.class).getParticleManager().showCenter(wid, p.getLocation());
             HungerGames.getPlugin(HungerGames.class).getParticleManager().refreshAllSpawns(wid, mgr.getWorkingArena().orElse(null));
             // apply world border for this arena (centered at player location)

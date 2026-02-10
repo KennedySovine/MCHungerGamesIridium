@@ -20,6 +20,7 @@ public class ParticleManager {
     private final Map<String, BukkitTask> centerBeacons = new HashMap<>();
 
     private final HungerGames plugin;
+    private boolean enabled = true;
 
     public ParticleManager(HungerGames plugin) {
         this.plugin = plugin;
@@ -34,7 +35,16 @@ public class ParticleManager {
         if (cb != null) cb.cancel();
     }
 
+    public void clearAll() {
+        // cancel all spawn and center beacons across arenas
+        for (Map<Integer, BukkitTask> m : spawnBeacons.values()) if (m != null) for (BukkitTask t : m.values()) if (t != null) t.cancel();
+        spawnBeacons.clear();
+        for (BukkitTask t : centerBeacons.values()) if (t != null) t.cancel();
+        centerBeacons.clear();
+    }
+
     public void showCenter(String arenaId, Location loc) {
+        if (!enabled) return;
         if (arenaId == null || loc == null) return;
         // cancel previous if present
         BukkitTask prev = centerBeacons.remove(arenaId);
@@ -44,6 +54,7 @@ public class ParticleManager {
     }
 
     public void showSpawn(String arenaId, int index, Location loc) {
+        if (!enabled) return;
         if (arenaId == null || loc == null) return;
         Map<Integer, BukkitTask> map = spawnBeacons.computeIfAbsent(arenaId, k -> new HashMap<>());
         // cancel existing for index
@@ -58,6 +69,12 @@ public class ParticleManager {
         if (map == null) return;
         BukkitTask t = map.remove(index);
         if (t != null) t.cancel();
+    }
+
+    public boolean isEnabled() { return enabled; }
+    public void setEnabled(boolean v) {
+        this.enabled = v;
+        if (!v) clearAll();
     }
 
     public void refreshAllSpawns(String arenaId, Arena arena) {
@@ -76,4 +93,3 @@ public class ParticleManager {
         }
     }
 }
-

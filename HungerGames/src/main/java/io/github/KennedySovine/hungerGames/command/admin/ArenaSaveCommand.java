@@ -5,6 +5,7 @@ import io.github.KennedySovine.hungerGames.command.AbstractSubCommand;
 import io.github.KennedySovine.hungerGames.utils.MessageUtils;
 import org.bukkit.command.CommandSender;
 import org.bukkit.plugin.java.JavaPlugin;
+import io.github.KennedySovine.hungerGames.HungerGames;
 
 /**
  * /hg arena save
@@ -47,6 +48,13 @@ public class ArenaSaveCommand extends AbstractSubCommand {
         ArenaManager mgr = JavaPlugin.getPlugin(io.github.KennedySovine.hungerGames.HungerGames.class).getArenaManager();
         try {
             mgr.saveWorkingArena();
+            // Reset beacons for the saved arena so they reflect any persisted changes
+            mgr.getWorkingArena().ifPresent(a -> {
+                String id = a.getId();
+                HungerGames.getPlugin(HungerGames.class).getParticleManager().clearAllForArena(id);
+                HungerGames.getPlugin(HungerGames.class).getParticleManager().showCenter(id, a.getLobbyLocation());
+                HungerGames.getPlugin(HungerGames.class).getParticleManager().refreshAllSpawns(id, a);
+            });
             MessageUtils.send(sender, "&aWorking arena persisted to disk.");
         } catch (IllegalStateException ex) {
             MessageUtils.send(sender, "&cCannot save: " + ex.getMessage());

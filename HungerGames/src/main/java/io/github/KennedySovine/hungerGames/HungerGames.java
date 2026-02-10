@@ -53,6 +53,7 @@ public final class HungerGames extends JavaPlugin {
         hgCommand.registerSubCommand("chestrefill", new ChestRefillCommand());
         hgCommand.registerSubCommand("start", new StartCommand());
         hgCommand.registerSubCommand("stop", new StopCommand());
+        hgCommand.registerSubCommand("beacons", new BeaconsCommand());
         hgCommand.registerSubCommand("join", new JoinCommand());
         hgCommand.registerSubCommand("leave", new LeaveCommand());
         hgCommand.registerSubCommand("stats", new StatsCommand());

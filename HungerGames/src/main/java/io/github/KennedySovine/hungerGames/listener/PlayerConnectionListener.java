@@ -25,6 +25,14 @@ public class PlayerConnectionListener implements Listener {
     @EventHandler
     public void onJoin(PlayerJoinEvent event) {
         combatManager.handleJoin(event.getPlayer().getUniqueId());
+        // Ensure beacon tasks are restored/refreshed when someone joins if a working arena exists
+        var mgr = event.getPlayer().getServer().getPluginManager();
+        var am = io.github.KennedySovine.hungerGames.HungerGames.getPlugin(io.github.KennedySovine.hungerGames.HungerGames.class).getArenaManager();
+        am.getWorkingArena().ifPresent(a -> {
+            String id = a.getId();
+            io.github.KennedySovine.hungerGames.HungerGames.getPlugin(io.github.KennedySovine.hungerGames.HungerGames.class).getParticleManager().clearAllForArena(id);
+            io.github.KennedySovine.hungerGames.HungerGames.getPlugin(io.github.KennedySovine.hungerGames.HungerGames.class).getParticleManager().showCenter(id, a.getLobbyLocation());
+            io.github.KennedySovine.hungerGames.HungerGames.getPlugin(io.github.KennedySovine.hungerGames.HungerGames.class).getParticleManager().refreshAllSpawns(id, a);
+        });
     }
 }
-
