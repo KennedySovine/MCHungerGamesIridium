@@ -70,8 +70,10 @@ public class JoinCommand extends AbstractSubCommand {
         // Check game state - must be in COUNTDOWN to join
         GameState state = gameManager.getGameState(arenaId);
         if (state != GameState.COUNTDOWN) {
-            if (state == GameState.FINISHED || state == GameState.LOBBY) {
-                MessageUtils.send(player, "&cThe game hasn't started yet! Ask an admin to start the game.");
+            if (state == GameState.LOBBY) {
+                MessageUtils.send(player, "&cThe game hasn't started yet! Ask an admin to start the game with /hg start.");
+            } else if (state == GameState.FINISHED) {
+                MessageUtils.send(player, "&cThe game has already finished! Ask an admin to start a new game.");
             } else {
                 MessageUtils.send(player, "&cThe game has already begun! You cannot join now.");
             }

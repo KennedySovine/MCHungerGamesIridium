@@ -31,9 +31,7 @@ public class PlayerMoveListener implements Listener {
         // Prevent movement in COUNTDOWN state
         if (state == GameState.COUNTDOWN) {
             // Only cancel if player actually moved (not just looking around)
-            if (event.getFrom().getX() != event.getTo().getX() ||
-                event.getFrom().getY() != event.getTo().getY() ||
-                event.getFrom().getZ() != event.getTo().getZ()) {
+            if (event.getFrom().distanceSquared(event.getTo()) > 0) {
                 event.setCancelled(true);
             }
         }

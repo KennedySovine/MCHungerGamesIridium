@@ -38,8 +38,8 @@ public class GameManager {
     // replace with a proper InventorySnapshot class later)
     private final Map<UUID, ItemStack[]> savedInventories = new ConcurrentHashMap<>();
     
-    // arenaId -> next spawn index to assign
-    private final Map<String, Integer> nextSpawnIndex = new ConcurrentHashMap<>();
+    // arenaId -> next spawn index to assign (using AtomicInteger for thread safety)
+    private final Map<String, java.util.concurrent.atomic.AtomicInteger> nextSpawnIndex = new ConcurrentHashMap<>();
 
     public GameManager(HungerGames plugin) {
         this.plugin = plugin;
@@ -100,10 +100,11 @@ public class GameManager {
             return false;
         }
         
-        // Get next available spawn point
-        int spawnIdx = getNextSpawnIndex(arenaId) % spawns.size();
+        // Get next available spawn point atomically (thread-safe)
+        java.util.concurrent.atomic.AtomicInteger counter = nextSpawnIndex.computeIfAbsent(arenaId, 
+            k -> new java.util.concurrent.atomic.AtomicInteger(0));
+        int spawnIdx = counter.getAndIncrement() % spawns.size();
         Location spawnLoc = spawns.get(spawnIdx);
-        incrementSpawnIndex(arenaId);
         
         // Save inventory snapshot so it can be restored later
         savedInventories.put(u, player.getInventory().getContents());
@@ -184,20 +185,6 @@ public class GameManager {
     public int getPlayerCount(String arenaId) {
         Set<UUID> players = arenaPlayers.get(arenaId);
         return players != null ? players.size() : 0;
-    }
-    
-    /**
-     * Get the next spawn index for a player joining the arena.
-     */
-    public int getNextSpawnIndex(String arenaId) {
-        return nextSpawnIndex.compute(arenaId, (k, v) -> v == null ? 0 : v);
-    }
-    
-    /**
-     * Increment the spawn index for the arena.
-     */
-    public void incrementSpawnIndex(String arenaId) {
-        nextSpawnIndex.compute(arenaId, (k, v) -> (v == null ? 0 : v) + 1);
     }
 
     // --- Hooks used by CombatManager (minimal implementations) ---
