@@ -3,9 +3,12 @@ package io.github.KennedySovine.hungerGames.game;
 import io.github.KennedySovine.hungerGames.HungerGames;
 import io.github.KennedySovine.hungerGames.utils.MessageUtils;
 import org.bukkit.Bukkit;
+import org.bukkit.GameMode;
+import org.bukkit.Location;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
@@ -71,7 +74,7 @@ public class GameManager {
                     }
                     // Put non-admin players back in spectator mode
                     if (!p.hasPermission("HungerGames.admin") && !p.isOp()) {
-                        p.setGameMode(org.bukkit.GameMode.SPECTATOR);
+                        p.setGameMode(GameMode.SPECTATOR);
                     }
                     MessageUtils.send(p, "[HG] Game stopped - your inventory has been restored.");
                 }
@@ -91,7 +94,7 @@ public class GameManager {
         UUID u = player.getUniqueId();
         
         // Get spawn points
-        java.util.List<org.bukkit.Location> spawns = arena.getAbsoluteSpawns(arena.getLobbyLocation());
+        List<Location> spawns = arena.getAbsoluteSpawns(arena.getLobbyLocation());
         if (spawns.isEmpty()) {
             MessageUtils.send(player, "&cNo spawn points configured for this arena!");
             return false;
@@ -99,7 +102,7 @@ public class GameManager {
         
         // Get next available spawn point
         int spawnIdx = getNextSpawnIndex(arenaId) % spawns.size();
-        org.bukkit.Location spawnLoc = spawns.get(spawnIdx);
+        Location spawnLoc = spawns.get(spawnIdx);
         incrementSpawnIndex(arenaId);
         
         // Save inventory snapshot so it can be restored later
@@ -114,7 +117,7 @@ public class GameManager {
         player.teleport(spawnLoc);
         
         // Set player to survival mode (remove from spectator)
-        player.setGameMode(org.bukkit.GameMode.SURVIVAL);
+        player.setGameMode(GameMode.SURVIVAL);
         
         MessageUtils.send(player, "&aYou joined the game! Wait for the game to begin...");
         
