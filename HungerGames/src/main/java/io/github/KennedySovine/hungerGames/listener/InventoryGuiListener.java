@@ -26,6 +26,26 @@ public class InventoryGuiListener implements Listener {
     public void onInventoryClick(InventoryClickEvent event) {
         Inventory inv = event.getInventory();
         InventoryHolder holder = inv.getHolder();
+
+        // Handle Arena List GUI clicks (select an arena to load)
+        if (holder instanceof ArenaListGui.ListHolder) {
+            event.setCancelled(true);
+            ItemStack clicked = event.getCurrentItem();
+            if (clicked == null) return;
+            if (!clicked.hasItemMeta() || !clicked.getItemMeta().hasDisplayName()) return;
+            Player clicker = (Player) event.getWhoClicked();
+            if (!clicker.hasPermission("HungerGames.admin")) {
+                MessageUtils.send(clicker, "&cYou do not have permission to load arenas.");
+                return;
+            }
+            String arenaId = clicked.getItemMeta().getDisplayName();
+            // Close inventory and run the load command as the player (will set center to player's location)
+            clicker.closeInventory();
+            clicker.performCommand("hg arena load " + arenaId);
+            return;
+        }
+
+        // Handle Editor GUI interactions
         if (!(holder instanceof ArenaEditorGui.EditorHolder)) return;
 
         // We handle clicks in our editor; cancel default behavior
