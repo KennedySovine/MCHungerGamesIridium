@@ -53,6 +53,10 @@ public class SetCenterCommand extends AbstractSubCommand {
         Arena working = wa.get();
         working.setLobbyLocation(loc);
         MessageUtils.send(sender, "&aWorking arena center set to your current location: " + loc.getBlockX() + ", " + loc.getBlockY() + ", " + loc.getBlockZ());
+        // update center beacon and refresh spawn beacons to reflect new center
+        String wid = working.getId();
+        HungerGames.getPlugin(HungerGames.class).getParticleManager().showCenter(wid, loc);
+        HungerGames.getPlugin(HungerGames.class).getParticleManager().refreshAllSpawns(wid, wa.get());
         return true;
     }
 }
