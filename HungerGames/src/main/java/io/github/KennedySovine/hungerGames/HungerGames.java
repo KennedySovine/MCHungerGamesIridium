@@ -38,11 +38,8 @@ public final class HungerGames extends JavaPlugin {
         this.hgCommand = new HgCommand(this);
 
         // Register subcommand skeletons (these classes are lightweight stubs)
-        hgCommand.registerSubCommand("arena create", new CreateArenaCommand());
-        hgCommand.registerSubCommand("arena load", new ArenaLoadCommand());
-        hgCommand.registerSubCommand("arena save", new ArenaSaveCommand());
-        hgCommand.registerSubCommand("arena addspawn", new AddSpawnCommand());
-        hgCommand.registerSubCommand("arena removespawn", new RemoveSpawnCommand());
+        // Register a single 'arena' parent command that dispatches to child arena subcommands
+        hgCommand.registerSubCommand("arena", new ArenaParentCommand());
         hgCommand.registerSubCommand("maxplayers", new MaxPlayersCommand());
         hgCommand.registerSubCommand("minplayers", new MinPlayersCommand());
         hgCommand.registerSubCommand("time", new TimeCommand());
@@ -55,6 +52,7 @@ public final class HungerGames extends JavaPlugin {
         hgCommand.registerSubCommand("join", new JoinCommand());
         hgCommand.registerSubCommand("leave", new LeaveCommand());
         hgCommand.registerSubCommand("stats", new StatsCommand());
+        // other arena subcommands are handled by ArenaParentCommand
 
         // Register with Bukkit to handle /hg
         if (getCommand("hg") != null) {

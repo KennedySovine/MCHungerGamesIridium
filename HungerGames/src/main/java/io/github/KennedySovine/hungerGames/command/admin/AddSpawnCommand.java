@@ -5,6 +5,7 @@ import io.github.KennedySovine.hungerGames.arena.Arena;
 import io.github.KennedySovine.hungerGames.arena.ArenaManager;
 import io.github.KennedySovine.hungerGames.command.AbstractSubCommand;
 import io.github.KennedySovine.hungerGames.arena.ArenaManager;
+import io.github.KennedySovine.hungerGames.utils.MessageUtils;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.java.JavaPlugin;
@@ -55,13 +56,13 @@ public class AddSpawnCommand extends AbstractSubCommand {
     public boolean execute(CommandSender sender, String[] args) {
         // No additional args allowed
         if (args.length > 0) {
-            sender.sendMessage("&cUsage: " + usage() + " — do not provide an arena id. Load the arena with '/hg arena load <id>' first.");
+            MessageUtils.send(sender, "&cUsage: " + usage() + " — do not provide an arena id. Load the arena with '/hg arena load <id>' first.");
             return true;
         }
 
         Optional<Player> pOpt = asPlayer(sender);
         if (pOpt.isEmpty()) {
-            sender.sendMessage("&cThis command must be executed by a player.");
+            MessageUtils.send(sender, "&cThis command must be executed by a player.");
             return true;
         }
         Player player = pOpt.get();
@@ -69,16 +70,16 @@ public class AddSpawnCommand extends AbstractSubCommand {
         ArenaManager mgr = JavaPlugin.getPlugin(HungerGames.class).getArenaManager();
         Optional<Arena> workingOpt = mgr.getWorkingArena();
         if (workingOpt.isEmpty()) {
-            sender.sendMessage("&cNo working arena loaded. Use '/hg arena load <arena>' or '/hg arena create <arena>' first.");
+            MessageUtils.send(sender, "&cNo working arena loaded. Use '/hg arena load <arena>' or '/hg arena create <arena>' first.");
             return true;
         }
 
         boolean ok = mgr.addSpawnPointToWorking(player.getLocation());
         if (!ok) {
-            sender.sendMessage("&cFailed to add spawn to working arena. Ensure the working arena has a center/lobby set.");
+            MessageUtils.send(sender, "&cFailed to add spawn to working arena. Ensure the working arena has a center/lobby set.");
             return true;
         }
-        sender.sendMessage("&aSpawn added to working arena at your location (in-memory). Use '/hg arena save' to persist.");
+        MessageUtils.send(sender, "&aSpawn added to working arena at your location (in-memory). Use '/hg arena save' to persist.");
         return true;
     }
 }

@@ -1,6 +1,7 @@
 package io.github.KennedySovine.hungerGames.game;
 
 import io.github.KennedySovine.hungerGames.HungerGames;
+import io.github.KennedySovine.hungerGames.utils.MessageUtils;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
@@ -62,11 +63,11 @@ public class GameManager {
                 ItemStack[] saved = savedInventories.remove(u);
                 if (p != null && saved != null) {
                     p.getInventory().setContents(saved);
-                    p.sendMessage("[HG] Game stopped - your inventory has been restored.");
+                    MessageUtils.send(p, "[HG] Game stopped - your inventory has been restored.");
                 }
             }
         }
-        Bukkit.broadcastMessage("[HG] Stopped game for arena: " + arenaId);
+        Bukkit.broadcastMessage(MessageUtils.color("[HG] Stopped game for arena: " + arenaId));
     }
 
     /**
@@ -83,7 +84,7 @@ public class GameManager {
         arenaPlayers.computeIfAbsent(arenaId, k -> ConcurrentHashMap.newKeySet()).add(u);
         playerArena.put(u, arenaId);
 
-        player.sendMessage("[HG] You joined arena: " + arenaId + " (skeleton behavior). Implement teleport/inventory logic later.");
+        MessageUtils.send(player, "[HG] You joined arena: " + arenaId + " (skeleton behavior). Implement teleport/inventory logic later.");
     }
 
     /**
@@ -101,7 +102,7 @@ public class GameManager {
         if (saved != null) {
             player.getInventory().setContents(saved);
         }
-        player.sendMessage("[HG] You have left the arena (skeleton behavior).");
+        MessageUtils.send(player, "[HG] You have left the arena (skeleton behavior).");
     }
 
     public GameState getGameState(String arenaId) {
@@ -124,7 +125,7 @@ public class GameManager {
         // If player is online, show death UI/message. Otherwise log.
         Player p = Bukkit.getPlayer(playerUuid);
         if (p != null) {
-            p.sendMessage("You have been killed due to combat logging.");
+            MessageUtils.send(p, "You have been killed due to combat logging.");
             // TODO: present death/spectator UI
         } else {
             plugin.getLogger().info("Player " + playerUuid + " was killed due to combat logout in arena " + arenaId);
@@ -158,11 +159,11 @@ public class GameManager {
         ItemStack[] saved = savedInventories.remove(playerUuid);
         if (saved != null) {
             p.getInventory().setContents(saved);
-            p.sendMessage("[HG] Welcome back — your inventory was restored (skeleton behavior).");
+            MessageUtils.send(p, "[HG] Welcome back — your inventory was restored (skeleton behavior).");
             return;
         }
 
         // Otherwise, inform they were killed or need manual handling
-        p.sendMessage("[HG] Welcome back. If you were marked dead while offline, you'll see spectator/death UI (to be implemented).");
+        MessageUtils.send(p, "[HG] Welcome back. If you were marked dead while offline, you'll see spectator/death UI (to be implemented).");
     }
 }

@@ -2,7 +2,9 @@ package io.github.KennedySovine.hungerGames.command.admin;
 
 import io.github.KennedySovine.hungerGames.arena.ArenaManager;
 import io.github.KennedySovine.hungerGames.command.AbstractSubCommand;
+import io.github.KennedySovine.hungerGames.utils.MessageUtils;
 import org.bukkit.command.CommandSender;
+import org.bukkit.entity.Player;
 import org.bukkit.plugin.java.JavaPlugin;
 
 /**
@@ -41,17 +43,26 @@ public class ArenaLoadCommand extends AbstractSubCommand {
     @Override
     public boolean execute(CommandSender sender, String[] args) {
         if (args.length < 1) {
-            sender.sendMessage("&cUsage: " + usage());
+            MessageUtils.send(sender, "&cUsage: " + usage());
             return true;
         }
         String arenaId = args[0];
         ArenaManager mgr = JavaPlugin.getPlugin(io.github.KennedySovine.hungerGames.HungerGames.class).getArenaManager();
         boolean ok = mgr.loadWorkingArena(arenaId);
         if (!ok) {
-            sender.sendMessage("&cArena not found: " + arenaId);
+            MessageUtils.send(sender, "&cArena not found: " + arenaId);
             return true;
         }
-        sender.sendMessage("&aLoaded arena into working memory: " + arenaId + " (further edit commands will use this arena by default)");
+
+        // If sender is a player, set the working arena center to their current location
+        if (sender instanceof Player) {
+            Player p = (Player) sender;
+            mgr.getWorkingArena().ifPresent(a -> a.setLobbyLocation(p.getLocation()));
+            MessageUtils.send(sender, "&aLoaded arena into working memory: " + arenaId + " and set center to your current location.");
+            return true;
+        }
+
+        MessageUtils.send(sender, "&aLoaded arena into working memory: " + arenaId + " (further edit commands will use this arena by default)");
         return true;
     }
 }
