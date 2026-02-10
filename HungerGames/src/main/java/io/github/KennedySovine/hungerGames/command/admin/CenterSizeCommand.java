@@ -60,6 +60,10 @@ public class CenterSizeCommand extends AbstractSubCommand {
         }
         Arena working = opt.get();
         working.setCenterSize(size);
+        // If the working arena has a lobby/center set, update the world border immediately
+        if (working.getLobbyLocation() != null) {
+            HungerGames.getPlugin(HungerGames.class).getBorderManager().applyBorder(working.getId(), working.getLobbyLocation(), size);
+        }
         MessageUtils.send(sender, "&aSet center size for working arena " + working.getId() + " to " + size + " (in-memory). Use '/hg arena save' to persist.");
         return true;
     }

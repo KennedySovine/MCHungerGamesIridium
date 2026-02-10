@@ -65,6 +65,8 @@ public class ArenaLoadCommand extends AbstractSubCommand {
             String wid = mgr.getWorkingArena().map(a -> a.getId()).orElse("");
             HungerGames.getPlugin(HungerGames.class).getParticleManager().showCenter(wid, p.getLocation());
             HungerGames.getPlugin(HungerGames.class).getParticleManager().refreshAllSpawns(wid, mgr.getWorkingArena().orElse(null));
+            // apply world border for this arena (centered at player location)
+            mgr.getWorkingArena().ifPresent(a -> HungerGames.getPlugin(HungerGames.class).getBorderManager().applyBorder(a.getId(), p.getLocation(), a.getCenterSize()));
             return true;
         }
 

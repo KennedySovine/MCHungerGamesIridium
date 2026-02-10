@@ -23,6 +23,7 @@ public final class HungerGames extends JavaPlugin {
     private CombatManager combatManager;
     private StatsManager statsManager;
     private io.github.KennedySovine.hungerGames.utils.ParticleManager particleManager;
+    private io.github.KennedySovine.hungerGames.utils.BorderManager borderManager;
 
     @Override
     public void onEnable() {
@@ -33,6 +34,7 @@ public final class HungerGames extends JavaPlugin {
         this.combatManager = new CombatManager(this);
         this.statsManager = new StatsManager(this);
         this.particleManager = new io.github.KennedySovine.hungerGames.utils.ParticleManager(this);
+        this.borderManager = new io.github.KennedySovine.hungerGames.utils.BorderManager(this);
 
         // Load arenas from disk
         arenaManager.loadArenas();
@@ -77,6 +79,10 @@ public final class HungerGames extends JavaPlugin {
     @Override
     public void onDisable() {
         // Plugin shutdown logic
+        // restore any modified world borders
+        if (borderManager != null) {
+            borderManager.getActiveArenaId().ifPresent(id -> borderManager.clearBorder(id));
+        }
         getLogger().info("HungerGames plugin disabled.");
     }
 
@@ -99,6 +105,10 @@ public final class HungerGames extends JavaPlugin {
 
     public io.github.KennedySovine.hungerGames.utils.ParticleManager getParticleManager() {
         return particleManager;
+    }
+
+    public io.github.KennedySovine.hungerGames.utils.BorderManager getBorderManager() {
+        return borderManager;
     }
 
     public YamlStorage getStorage() {

@@ -57,6 +57,8 @@ public class SetCenterCommand extends AbstractSubCommand {
         String wid = working.getId();
         HungerGames.getPlugin(HungerGames.class).getParticleManager().showCenter(wid, loc);
         HungerGames.getPlugin(HungerGames.class).getParticleManager().refreshAllSpawns(wid, wa.get());
+        // update world border to new center
+        HungerGames.getPlugin(HungerGames.class).getBorderManager().applyBorder(wid, loc, working.getCenterSize());
         return true;
     }
 }

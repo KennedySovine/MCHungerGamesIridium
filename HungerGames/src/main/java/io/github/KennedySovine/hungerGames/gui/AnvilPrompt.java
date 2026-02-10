@@ -34,8 +34,8 @@ public final class AnvilPrompt {
 
     public static void open(Player player, String title, String initialText, Consumer<String> onComplete) {
         JavaPlugin plugin = JavaPlugin.getPlugin(HungerGames.class);
-        // Some server API versions may not expose InventoryType.ANVIL; use a 3-slot inventory as a compatibility fallback
-        Inventory inv = Bukkit.createInventory(new AnvilHolder(), 3, title == null ? "Input" : title);
+        // Some server API versions may not expose InventoryType.ANVIL; use a 9-slot inventory (must be multiple of 9)
+        Inventory inv = Bukkit.createInventory(new AnvilHolder(), 9, title == null ? "Input" : title);
         ItemStack it = new ItemStack(Material.PAPER);
         ItemMeta m = it.getItemMeta();
         m.setDisplayName(initialText == null ? "" : initialText);
