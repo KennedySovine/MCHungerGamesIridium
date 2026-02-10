@@ -13,8 +13,10 @@ import java.util.Optional;
 /**
  * /hg start
  *
- * Starts a match using the currently loaded working arena. No arena id may be
- * supplied; to start a different arena, first use '/hg arena load <id>'.
+ * Opens the game for players to join (sets state to COUNTDOWN).
+ * Players can join via /hg join but cannot move until the game begins.
+ * Use /hg begin to actually start the game and allow movement.
+ * No arena id may be supplied; to start a different arena, first use '/hg arena load <id>'.
  */
 public class StartCommand extends AbstractSubCommand {
 
@@ -42,7 +44,8 @@ public class StartCommand extends AbstractSubCommand {
      *
      * Behavior:
      * - Requires permission: HungerGames.admin
-     * - Starts the running game for the currently loaded working arena.
+     * - Opens the game for players to join (sets state to COUNTDOWN).
+     * - Players can join via /hg join but cannot move until /hg begin is used.
      */
     @Override
     public boolean execute(CommandSender sender, String[] args) {
@@ -61,7 +64,7 @@ public class StartCommand extends AbstractSubCommand {
 
         GameManager gm = JavaPlugin.getPlugin(HungerGames.class).getGameManager();
         gm.startGame(arenaId);
-        MessageUtils.send(sender, "&aRequested start for arena: " + arenaId);
+        MessageUtils.send(sender, "&aGame opened for joining! Players can now use /hg join. Use /hg begin to start the game.");
         return true;
     }
 }

@@ -43,12 +43,13 @@ public class GameManager {
     }
 
     /**
-     * Start a game for the given arena. Minimal behavior: record state and broadcast.
+     * Start a game for the given arena (opens it for players to join).
+     * Sets the game state to COUNTDOWN. Players can join but cannot move.
      */
     public void startGame(String arenaId) {
         // TODO: schedule countdown -> running transitions and chest/border tasks
         games.put(arenaId, GameState.COUNTDOWN);
-        Bukkit.broadcastMessage("[HG] Starting game for arena: " + arenaId);
+        Bukkit.broadcastMessage(MessageUtils.color("&a[HG] Game is now open for joining! Use /hg join to participate."));
     }
 
     /**
@@ -64,8 +65,14 @@ public class GameManager {
                 // Attempt to restore inventory if player is online
                 Player p = Bukkit.getPlayer(u);
                 ItemStack[] saved = savedInventories.remove(u);
-                if (p != null && saved != null) {
-                    p.getInventory().setContents(saved);
+                if (p != null) {
+                    if (saved != null) {
+                        p.getInventory().setContents(saved);
+                    }
+                    // Put non-admin players back in spectator mode
+                    if (!p.hasPermission("HungerGames.admin") && !p.isOp()) {
+                        p.setGameMode(org.bukkit.GameMode.SPECTATOR);
+                    }
                     MessageUtils.send(p, "[HG] Game stopped - your inventory has been restored.");
                 }
             }
