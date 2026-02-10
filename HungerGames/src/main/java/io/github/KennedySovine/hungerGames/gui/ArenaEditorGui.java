@@ -14,6 +14,7 @@ import org.bukkit.plugin.java.JavaPlugin;
 public class ArenaEditorGui {
 
     public static final String SPAWN_STICK_KEY_NAME = "hg_arena_id";
+    public static final String SET_CENTER_DISPLAY = "Set Center";
 
     /**
      * Public opener: builds the editor inventory and opens it for the player.
@@ -66,6 +67,11 @@ public class ArenaEditorGui {
         ItemMeta stickMeta = giveSpawnStick.getItemMeta();
         stickMeta.setDisplayName("Give Spawn Stick");
         giveSpawnStick.setItemMeta(stickMeta);
+
+        ItemStack setCenter = new ItemStack(Material.COMPASS);
+        ItemMeta setCenterMeta = setCenter.getItemMeta();
+        setCenterMeta.setDisplayName(SET_CENTER_DISPLAY);
+        setCenter.setItemMeta(setCenterMeta);
         // Add other items as needed for the other admin commands, if its even necessary for the other commands.
 
         // If there is no currently loaded arena, we are in create/load mode
@@ -79,6 +85,7 @@ public class ArenaEditorGui {
             inv.setItem(1, addSpawn);
             inv.setItem(4, giveSpawnStick);
             inv.setItem(7, removeSpawn);
+            inv.setItem(2, setCenter);
             inv.setItem(12, createArena);
             inv.setItem(13, saveArena);
             inv.setItem(14, loadArena);

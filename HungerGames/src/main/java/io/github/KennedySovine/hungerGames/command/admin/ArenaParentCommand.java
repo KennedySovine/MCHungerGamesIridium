@@ -24,6 +24,7 @@ public class ArenaParentCommand extends AbstractSubCommand {
         registerChild("save", new ArenaSaveCommand());
         registerChild("addspawn", new AddSpawnCommand());
         registerChild("removespawn", new RemoveSpawnCommand());
+        registerChild("setcenter", new SetCenterCommand());
         registerChild("list", new ArenaListCommand());
     }
 
@@ -104,4 +105,3 @@ public class ArenaParentCommand extends AbstractSubCommand {
         }
     }
 }
-
