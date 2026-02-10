@@ -52,6 +52,7 @@ public final class HungerGames extends JavaPlugin {
         hgCommand.registerSubCommand("graceperiod", new GracePeriodCommand());
         hgCommand.registerSubCommand("chestrefill", new ChestRefillCommand());
         hgCommand.registerSubCommand("start", new StartCommand());
+        hgCommand.registerSubCommand("begin", new BeginCommand());
         hgCommand.registerSubCommand("stop", new StopCommand());
         hgCommand.registerSubCommand("join", new JoinCommand());
         hgCommand.registerSubCommand("leave", new LeaveCommand());
@@ -68,10 +69,12 @@ public final class HungerGames extends JavaPlugin {
 
         // Register listeners
         getServer().getPluginManager().registerEvents(new CombatListener(combatManager), this);
-        getServer().getPluginManager().registerEvents(new PlayerConnectionListener(combatManager), this);
+        getServer().getPluginManager().registerEvents(new PlayerConnectionListener(combatManager, gameManager), this);
         getServer().getPluginManager().registerEvents(new PlayerDeathListener(), this);
         getServer().getPluginManager().registerEvents(new InventoryGuiListener(), this);
         getServer().getPluginManager().registerEvents(new SpawnStickListener(), this);
+        getServer().getPluginManager().registerEvents(new PlayerMoveListener(gameManager), this);
+        getServer().getPluginManager().registerEvents(new BlockBreakListener(gameManager), this);
 
         getLogger().info("HungerGames plugin enabled (commands & managers registered). Started in dry-skeleton mode.");
     }
