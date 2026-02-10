@@ -96,7 +96,15 @@ public class ArenaEditorGui {
     }
 
     public void giveSpawnStick(Player admin, String arenaId) {
-        // Implement when ready
+        // Give a stick with PDC metadata so SpawnStickListener can detect it.
+        ItemStack stick = new ItemStack(Material.STICK);
+        ItemMeta meta = stick.getItemMeta();
+        meta.setDisplayName("Spawn Stick - " + (arenaId == null ? "(none)" : arenaId));
+        // Store arena id in persistent data container so listener can read it
+        org.bukkit.NamespacedKey key = new org.bukkit.NamespacedKey(JavaPlugin.getPlugin(HungerGames.class), SPAWN_STICK_KEY_NAME);
+        meta.getPersistentDataContainer().set(key, org.bukkit.persistence.PersistentDataType.STRING, arenaId == null ? "" : arenaId);
+        stick.setItemMeta(meta);
+        admin.getInventory().addItem(stick);
     }
 
     private String createEditorTitle(String arenaId) {
