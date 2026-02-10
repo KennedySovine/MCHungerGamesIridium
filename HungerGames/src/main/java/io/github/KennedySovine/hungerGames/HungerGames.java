@@ -22,6 +22,7 @@ public final class HungerGames extends JavaPlugin {
     private GameManager gameManager;
     private CombatManager combatManager;
     private StatsManager statsManager;
+    private io.github.KennedySovine.hungerGames.utils.ParticleManager particleManager;
 
     @Override
     public void onEnable() {
@@ -31,6 +32,7 @@ public final class HungerGames extends JavaPlugin {
         this.gameManager = new GameManager(this);
         this.combatManager = new CombatManager(this);
         this.statsManager = new StatsManager(this);
+        this.particleManager = new io.github.KennedySovine.hungerGames.utils.ParticleManager(this);
 
         // Load arenas from disk
         arenaManager.loadArenas();
@@ -93,6 +95,10 @@ public final class HungerGames extends JavaPlugin {
 
     public StatsManager getStatsManager() {
         return statsManager;
+    }
+
+    public io.github.KennedySovine.hungerGames.utils.ParticleManager getParticleManager() {
+        return particleManager;
     }
 
     public YamlStorage getStorage() {

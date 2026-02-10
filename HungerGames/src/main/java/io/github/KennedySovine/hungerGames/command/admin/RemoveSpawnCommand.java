@@ -4,6 +4,7 @@ import io.github.KennedySovine.hungerGames.HungerGames;
 import io.github.KennedySovine.hungerGames.arena.Arena;
 import io.github.KennedySovine.hungerGames.arena.ArenaManager;
 import io.github.KennedySovine.hungerGames.command.AbstractSubCommand;
+import io.github.KennedySovine.hungerGames.utils.MessageUtils;
 import org.bukkit.Location;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
@@ -87,10 +88,14 @@ public class RemoveSpawnCommand extends AbstractSubCommand {
 
             boolean removed = mgr.removeSpawnPointFromWorking(found);
             if (!removed) {
-                sender.sendMessage("&cFailed to remove spawn from working arena.");
+                MessageUtils.send(sender, "&cFailed to remove spawn from working arena.");
                 return true;
             }
-            sender.sendMessage("&aRemoved spawn at your location (index " + found + ") from working arena " + working.getId() + " (in-memory). Use '/hg arena save' to persist.");
+            // remove beacon for that index and refresh remaining spawn beacons
+            String wid = HungerGames.getPlugin(HungerGames.class).getArenaManager().getWorkingArena().map(a -> a.getId()).orElse("");
+            HungerGames.getPlugin(HungerGames.class).getParticleManager().removeSpawn(wid, found);
+            HungerGames.getPlugin(HungerGames.class).getParticleManager().refreshAllSpawns(wid, mgr.getWorkingArena().orElse(null));
+            MessageUtils.send(sender, "&aRemoved spawn at your location (index " + found + ") from working arena " + working.getId() + " (in-memory). Use '/hg arena save' to persist.");
             return true;
         }
 
@@ -100,10 +105,14 @@ public class RemoveSpawnCommand extends AbstractSubCommand {
             if (idx.isEmpty()) return true;
             boolean removed = mgr.removeSpawnPointFromWorking(idx.get());
             if (!removed) {
-                sender.sendMessage("&cFailed to remove spawn at index in working arena. Ensure index is valid.");
+                MessageUtils.send(sender, "&cFailed to remove spawn at index in working arena. Ensure index is valid.");
                 return true;
             }
-            sender.sendMessage("&aRemoved spawn index " + idx.get() + " from working arena " + working.getId() + " (in-memory). Use '/hg arena save' to persist.");
+            // cancel beacon and refresh
+            String wid2 = HungerGames.getPlugin(HungerGames.class).getArenaManager().getWorkingArena().map(a -> a.getId()).orElse("");
+            HungerGames.getPlugin(HungerGames.class).getParticleManager().removeSpawn(wid2, idx.get());
+            HungerGames.getPlugin(HungerGames.class).getParticleManager().refreshAllSpawns(wid2, mgr.getWorkingArena().orElse(null));
+            MessageUtils.send(sender, "&aRemoved spawn index " + idx.get() + " from working arena " + working.getId() + " (in-memory). Use '/hg arena save' to persist.");
             return true;
         }
 

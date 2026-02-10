@@ -4,7 +4,6 @@ import io.github.KennedySovine.hungerGames.HungerGames;
 import io.github.KennedySovine.hungerGames.arena.Arena;
 import io.github.KennedySovine.hungerGames.arena.ArenaManager;
 import io.github.KennedySovine.hungerGames.command.AbstractSubCommand;
-import io.github.KennedySovine.hungerGames.arena.ArenaManager;
 import io.github.KennedySovine.hungerGames.utils.MessageUtils;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
@@ -79,6 +78,9 @@ public class AddSpawnCommand extends AbstractSubCommand {
             MessageUtils.send(sender, "&cFailed to add spawn to working arena. Ensure the working arena has a center/lobby set.");
             return true;
         }
+        Arena working = mgr.getWorkingArena().get();
+        // register spawn beacon with ParticleManager
+        HungerGames.getPlugin(HungerGames.class).getParticleManager().showSpawn(working.getId(), working.getSpawnOffsets().size()-1, player.getLocation());
         MessageUtils.send(sender, "&aSpawn added to working arena at your location (in-memory). Use '/hg arena save' to persist.");
         return true;
     }

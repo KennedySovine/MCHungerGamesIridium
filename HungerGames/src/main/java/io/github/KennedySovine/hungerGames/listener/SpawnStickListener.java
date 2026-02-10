@@ -34,6 +34,10 @@ public class SpawnStickListener implements Listener {
             MessageUtils.send(p, "&cFailed to add spawn to working arena. Ensure a working arena is loaded and has a center set.");
             return;
         }
+        // register spawn beacon via ParticleManager
+        // working arena id will be used
+        String wid = HungerGames.getPlugin(HungerGames.class).getArenaManager().getWorkingArena().map(a -> a.getId()).orElse("");
+        HungerGames.getPlugin(HungerGames.class).getParticleManager().showSpawn(wid, HungerGames.getPlugin(HungerGames.class).getArenaManager().getWorkingArena().map(a -> a.getSpawnOffsets().size()-1).orElse(0), p.getLocation());
         MessageUtils.send(p, "&aSpawn added at your location (relative offset saved in working arena). Use '/hg arena save' to persist.");
     }
 }

@@ -1,8 +1,10 @@
 package io.github.KennedySovine.hungerGames.command.admin;
 
+import io.github.KennedySovine.hungerGames.HungerGames;
 import io.github.KennedySovine.hungerGames.arena.ArenaManager;
 import io.github.KennedySovine.hungerGames.command.AbstractSubCommand;
 import io.github.KennedySovine.hungerGames.utils.MessageUtils;
+import io.github.KennedySovine.hungerGames.utils.ParticleUtils;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.java.JavaPlugin;
@@ -59,6 +61,10 @@ public class ArenaLoadCommand extends AbstractSubCommand {
             Player p = (Player) sender;
             mgr.getWorkingArena().ifPresent(a -> a.setLobbyLocation(p.getLocation()));
             MessageUtils.send(sender, "&aLoaded arena into working memory: " + arenaId + " and set center to your current location.");
+            // show center beacon (yellow) and refresh spawn beacons
+            String wid = mgr.getWorkingArena().map(a -> a.getId()).orElse("");
+            HungerGames.getPlugin(HungerGames.class).getParticleManager().showCenter(wid, p.getLocation());
+            HungerGames.getPlugin(HungerGames.class).getParticleManager().refreshAllSpawns(wid, mgr.getWorkingArena().orElse(null));
             return true;
         }
 
