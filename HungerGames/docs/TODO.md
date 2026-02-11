@@ -3,17 +3,17 @@
 Task: update TODO to match the ordered plan (commands & managers first, then combat, chest/loot, listeners, game & stats, GUI, polish) and enumerate the exact methods and global variables you must implement in each file.
 
 Quick status checklist (work through top-to-bottom):
-- [ ] 1. Storage & utilities: `YamlStorage`, `LocationUtils`.
-- [ ] 2. Arena model: `Arena.java`.
-- [ ] 3. Arena persistence & manager: `ArenaManager.java` (includes working-arena placeholder APIs).
-- [ ] 4. Commands (admin + player): implement all listed command classes (commands-first). Commands that edit arenas should modify the working arena in-memory and not write to disk; use `/hg arena save` to persist.
-- [ ] 5. GameManager: minimal lifecycle hooks used by commands.
-- [ ] 6. Chest loot: `ChestLootManager` + `src/main/resources/config.yml` example.
-- [ ] 7. Combat system: `CombatManager` + `CombatListener` + connection handling.
-- [ ] 8. Stats: `StatsManager`, `PlayerStats` (match-scoped only).
-- [ ] 9. Listeners: `PlayerDeathListener`, `PlayerConnectionListener`, `InventoryGuiListener`, `SpawnStickListener`.
-- [ ] 10. Arena save/load semantics: relative spawn offsets (save when admin stands at center; load relative to current center position).
-- [ ] 11. GUI skeletons (defer full UX): `ArenaEditorGui`, `SpectatorGui`.
+- [x] 1. Storage & utilities: `YamlStorage`, `LocationUtils`.
+- [x] 2. Arena model: `Arena.java`.
+- [x] 3. Arena persistence & manager: `ArenaManager.java` (includes working-arena placeholder APIs).
+- [x] 4. Commands (admin + player): implement all listed command classes (commands-first). Commands that edit arenas should modify the working arena in-memory and not write to disk; use `/hg arena save` to persist.
+- [x] 5. GameManager: minimal lifecycle hooks used by commands.
+- [x] 6. Chest loot: `ChestLootManager` + `src/main/resources/config.yml` example.
+- [x] 7. Combat system: `CombatManager` + `CombatListener` + connection handling.
+- [x] 8. Stats: `StatsManager`, `PlayerStats` (match-scoped only).
+- [x] 9. Listeners: `PlayerDeathListener`, `PlayerConnectionListener`, `InventoryGuiListener`, `SpawnStickListener`.
+- [x] 10. Arena save/load semantics: relative spawn offsets (save when admin stands at center; load relative to current center position).
+- [x] 11. GUI skeletons (defer full UX): `ArenaEditorGui`, `SpectatorGui`.
 - [ ] 12. Tests, QA, polish, and docs updates (this TODO itself is part of docs).
 
 Notes and cross-cutting rules
@@ -22,7 +22,7 @@ Notes and cross-cutting rules
 - Persistence: use `YamlStorage` for file-based persistence. `plugin.getStorage()` is the single entrypoint.
 - No kits or teams in this phase.
 - Stats are non-persistent across server restarts — only match-scoped and only queryable after game end.
-- `setlobby` command removed. Delete file `src/main/java/io/github/KennedySovine/hungerGames/command/admin/SetLobbyCommand.java`.
+- [x] `setlobby` command removed. Delete file `src/main/java/io/github/KennedySovine/hungerGames/command/admin/SetLobbyCommand.java` — COMPLETED (file deleted).
 
 PHASE 1 — Commands & Core Managers (highest priority)
 
@@ -317,8 +317,8 @@ PHASE 5 — GUI skeletons (defer interactive behavior)
 PHASE 6 — Final cleanup, docs, tests
 
 17) Delete deprecated file
-- `src/main/java/io/github/KennedySovine/hungerGames/command/admin/SetLobbyCommand.java` — delete file and remove any references.
-- Update `docs/FILES.md` and other docs if they reference `setlobby`.
+- [x] `src/main/java/io/github/KennedySovine/hungerGames/command/admin/SetLobbyCommand.java` — COMPLETED (file successfully deleted).
+- [x] Update `docs/FILES.md` and other docs if they reference `setlobby` — COMPLETED (no references found).
 
 18) Tests & QA checklist
 - Unit tests to add (where possible):
@@ -340,4 +340,78 @@ Style & Developer Guidance (short)
 - Use dependency injection where helpful (pass plugin/manager references via constructors) to make unit testing easier.
 - Add a short "manual test" comment block to the top of each implemented file to speed local QA.
 
-If you want, I can now implement a specific file (for example: `ArenaManager.loadArenas()` and `CreateArenaCommand`), or apply the file deletions for `SetLobbyCommand`. Reply with which you'd like me to implement next and I'll proceed."
+## IMPLEMENTATION STATUS SUMMARY
+
+### ✅ COMPLETED (Phases 1-5)
+
+**Phase 1 - Commands & Core Managers:**
+- ✅ YamlStorage.java - Fully implemented with atomic writes and thread safety
+- ✅ LocationUtils.java - Complete with relative offset serialization
+- ✅ Arena.java - Full POJO with all required fields and validation
+- ✅ ArenaManager.java - Working arena semantics fully implemented
+- ✅ All 14+ commands implemented (CreateArena, ArenaLoad, ArenaSave, AddSpawn, RemoveSpawn, MaxPlayers, MinPlayers, Time, CenterSize, GracePeriod, ChestRefill, Start, Stop, Join, Leave, Stats, and additional commands: ArenaList, SetCenter, Beacons, Gui)
+
+**Phase 2 - Game, Combat, Chests:**
+- ✅ GameManager.java - Lifecycle management, join/leave, death handling hooks
+- ✅ ChestLootManager.java - Basic structure (weighted random needs completion)
+- ✅ CombatManager.java - Combat logging, grace periods, disconnect/reconnect handling
+
+**Phase 3 - Listeners & Stats:**
+- ✅ CombatListener.java - Basic implementation (projectile handling needs completion)
+- ✅ PlayerConnectionListener.java - Full join/quit handling
+- ✅ PlayerDeathListener.java - Basic skeleton (needs full integration)
+- ✅ InventoryGuiListener.java - Created
+- ✅ SpawnStickListener.java - Created
+- ✅ StatsManager.java - Match-scoped stats tracking
+- ✅ PlayerStats.java - Data model complete
+
+**Phase 4 - Arena Semantics & Resources:**
+- ✅ Relative spawn offset save/load fully implemented
+- ✅ config.yml created with commented examples
+
+**Phase 5 - GUI Skeletons:**
+- ✅ ArenaEditorGui.java - Skeleton with inventory builder
+- ✅ SpectatorGui.java - Placeholder created
+
+**Phase 6 - Cleanup:**
+- ✅ SetLobbyCommand.java deleted
+
+### ⚠️ REMAINING WORK
+
+**Testing & QA:**
+- [ ] Unit tests for LocationUtils serialize/deserialize
+- [ ] CombatManager boundary tests (10s combat window edge cases)
+- [ ] ArenaManager round-trip tests
+- [ ] Manual integration testing on dev server
+
+**Polish Items:**
+- [ ] Complete ChestLootManager weighted random item selection
+- [ ] Complete PlayerDeathListener integration with GameManager/StatsManager
+- [ ] Complete CombatListener projectile damage handling
+- [ ] Implement interactive GUI behavior (currently skeletons only)
+- [ ] Add comprehensive Javadoc to all public methods (partially complete)
+- [ ] Documentation updates (in progress)
+
+### 📝 INVENTORY PLANS NOTED
+
+Based on GUI_PLANS.md and codebase exploration:
+
+**Arena Editor Inventory GUI:**
+- Inventory-based editor accessible via `/hg gui` or `/hg arena edit <arenaName>`
+- Main menu slots for editing arena properties (clicks to modify values)
+- Spawn-stick system: Click button to receive a STICK item with PersistentDataContainer
+- Right-click with spawn-stick records player's location as spawn point
+- Save/Cancel buttons to commit or discard changes
+
+**Spectator Inventory GUI:**
+- Inventory listing all alive players in current match
+- Click player head to teleport spectator to that player
+- Updates dynamically as players are eliminated
+
+**Implementation Notes:**
+- GUIs cancel InventoryClickEvent to prevent item movement
+- Item meta/lore provides visual affordances for actions
+- Confirmation steps for destructive operations (remove spawn, delete arena)
+- Spawn-stick uses PersistentDataContainer key `hungergames:spawnstick` with arena ID
+
+The framework for these inventories exists; interactive behavior is deferred per the phased implementation plan.
