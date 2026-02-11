@@ -212,9 +212,9 @@ public class InventoryGuiListener implements Listener {
         // Handle RUNNING menu clicks
         if (state == GameState.RUNNING || state == GameState.DEATHMATCH) {
             // Handle player head clicks (teleport to player)
-            if (clicked.getType() == Material.PLAYER_HEAD) {
+            if (clicked.getType() == Material.PLAYER_HEAD && clicked.getItemMeta() instanceof SkullMeta) {
                 SkullMeta meta = (SkullMeta) clicked.getItemMeta();
-                if (meta != null && meta.getOwningPlayer() != null) {
+                if (meta.getOwningPlayer() != null) {
                     Player target = Bukkit.getPlayer(meta.getOwningPlayer().getUniqueId());
                     if (target != null && target.isOnline()) {
                         clicker.teleport(target.getLocation());

@@ -28,12 +28,15 @@ public class SpectatorGui {
      * Custom inventory holder to identify spectator GUI inventories.
      */
     public static class SpectatorHolder implements InventoryHolder {
-        private final Inventory inventory;
+        private Inventory inventory;
         private final GameState state;
 
-        public SpectatorHolder(Inventory inv, GameState state) {
-            this.inventory = inv;
+        public SpectatorHolder(GameState state) {
             this.state = state;
+        }
+        
+        public void setInventory(Inventory inv) {
+            this.inventory = inv;
         }
 
         @Override
@@ -79,9 +82,10 @@ public class SpectatorGui {
      * Opens the LOBBY menu with JOIN and SPECTATE options.
      */
     private static void openLobbyMenu(Player spectator, Arena arena, GameManager gameManager, HungerGames plugin) {
-        // Create 1-row (9 slots) inventory
-        Inventory inv = Bukkit.createInventory(new SpectatorHolder(null, GameState.LOBBY), 9, "§6Spectator Menu");
-        SpectatorHolder holder = new SpectatorHolder(inv, GameState.LOBBY);
+        // Create holder and inventory
+        SpectatorHolder holder = new SpectatorHolder(GameState.LOBBY);
+        Inventory inv = Bukkit.createInventory(holder, 9, "§6Spectator Menu");
+        holder.setInventory(inv);
 
         int playerCount = gameManager.getPlayerCount(arena.getId());
         int maxPlayers = arena.getMaxPlayers();
@@ -137,15 +141,17 @@ public class SpectatorGui {
         int rows = Math.max(2, (int) Math.ceil((playerSlots + 9) / 9.0)); // At least 2 rows
         int size = rows * 9;
 
-        Inventory inv = Bukkit.createInventory(new SpectatorHolder(null, GameState.RUNNING), size, "§6Spectator Menu - Players");
-        SpectatorHolder holder = new SpectatorHolder(inv, GameState.RUNNING);
+        // Create holder and inventory
+        SpectatorHolder holder = new SpectatorHolder(GameState.RUNNING);
+        Inventory inv = Bukkit.createInventory(holder, size, "§6Spectator Menu - Players");
+        holder.setInventory(inv);
 
         // Add player heads
         for (int i = 0; i < onlinePlayers.size() && i < size - 9; i++) {
             Player target = onlinePlayers.get(i);
             ItemStack head = new ItemStack(Material.PLAYER_HEAD);
-            SkullMeta skullMeta = (SkullMeta) head.getItemMeta();
-            if (skullMeta != null) {
+            if (head.getItemMeta() instanceof SkullMeta) {
+                SkullMeta skullMeta = (SkullMeta) head.getItemMeta();
                 skullMeta.setOwningPlayer(target);
                 skullMeta.setDisplayName("§e" + target.getName());
                 List<String> lore = new ArrayList<>();

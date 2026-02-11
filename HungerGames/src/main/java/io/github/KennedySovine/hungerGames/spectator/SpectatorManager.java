@@ -20,6 +20,8 @@ public class SpectatorManager {
     private final HungerGames plugin;
     
     // Queue for players waiting to join the next game (max 100, FIFO)
+    // Using LinkedList with synchronized blocks instead of ConcurrentLinkedQueue
+    // because we need size limits, contains() checks, and indexOf() for position tracking
     private final LinkedList<UUID> joinQueue = new LinkedList<>();
     private static final int MAX_QUEUE_SIZE = 100;
     
