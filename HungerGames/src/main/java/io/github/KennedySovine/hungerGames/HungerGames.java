@@ -24,6 +24,7 @@ public final class HungerGames extends JavaPlugin {
     private StatsManager statsManager;
     private io.github.KennedySovine.hungerGames.utils.ParticleManager particleManager;
     private io.github.KennedySovine.hungerGames.utils.BorderManager borderManager;
+    private io.github.KennedySovine.hungerGames.spectator.SpectatorManager spectatorManager;
 
     @Override
     public void onEnable() {
@@ -35,6 +36,7 @@ public final class HungerGames extends JavaPlugin {
         this.statsManager = new StatsManager(this);
         this.particleManager = new io.github.KennedySovine.hungerGames.utils.ParticleManager(this);
         this.borderManager = new io.github.KennedySovine.hungerGames.utils.BorderManager(this);
+        this.spectatorManager = new io.github.KennedySovine.hungerGames.spectator.SpectatorManager(this);
 
         // Load arenas from disk
         arenaManager.loadArenas();
@@ -52,6 +54,7 @@ public final class HungerGames extends JavaPlugin {
         hgCommand.registerSubCommand("graceperiod", new GracePeriodCommand());
         hgCommand.registerSubCommand("chestrefill", new ChestRefillCommand());
         hgCommand.registerSubCommand("start", new StartCommand());
+        hgCommand.registerSubCommand("begin", new BeginCommand());
         hgCommand.registerSubCommand("stop", new StopCommand());
         hgCommand.registerSubCommand("join", new JoinCommand());
         hgCommand.registerSubCommand("leave", new LeaveCommand());
@@ -68,10 +71,13 @@ public final class HungerGames extends JavaPlugin {
 
         // Register listeners
         getServer().getPluginManager().registerEvents(new CombatListener(combatManager), this);
-        getServer().getPluginManager().registerEvents(new PlayerConnectionListener(combatManager), this);
+        getServer().getPluginManager().registerEvents(new PlayerConnectionListener(combatManager, gameManager), this);
         getServer().getPluginManager().registerEvents(new PlayerDeathListener(), this);
         getServer().getPluginManager().registerEvents(new InventoryGuiListener(), this);
         getServer().getPluginManager().registerEvents(new SpawnStickListener(), this);
+        getServer().getPluginManager().registerEvents(new PlayerMoveListener(gameManager), this);
+        getServer().getPluginManager().registerEvents(new BlockBreakListener(gameManager), this);
+        getServer().getPluginManager().registerEvents(new CompassListener(), this);
 
         getLogger().info("HungerGames plugin enabled (commands & managers registered). Started in dry-skeleton mode.");
     }
@@ -113,5 +119,9 @@ public final class HungerGames extends JavaPlugin {
 
     public YamlStorage getStorage() {
         return storage;
+    }
+
+    public io.github.KennedySovine.hungerGames.spectator.SpectatorManager getSpectatorManager() {
+        return spectatorManager;
     }
 }

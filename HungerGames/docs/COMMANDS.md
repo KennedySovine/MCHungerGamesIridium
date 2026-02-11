@@ -44,17 +44,20 @@ Admin Commands (permission: HungerGames.admin)
   Description: Set the working arena's chest-refill interval (in-memory). Use `/hg arena save` to persist.
 
 - /hg start [arenaName]
-  Description: Start a match. If no arenaName is provided the currently loaded working arena id will be used (if any). This command affects runtime game state and does not modify arena persistence.
+  Description: Opens the game for players to join (sets state to COUNTDOWN). Players can join via `/hg join` but cannot move until the game begins with `/hg begin`. If no arenaName is provided the currently loaded working arena id will be used (if any). This command affects runtime game state and does not modify arena persistence.
+
+- /hg begin
+  Description: Begins the game for the currently loaded working arena (transitions from COUNTDOWN to RUNNING). Players can now move and play. The game will also auto-begin when max players is reached.
 
 - /hg stop [arenaName]
   Description: Stop the running match. If no arenaName is provided the currently loaded working arena id will be used (if any).
 
-Player Commands (no permission required)
-- /hg join <arenaName>
-  Description: Join the specified arena lobby.
+Player Commands (permission: HungerGames.player)
+- /hg join
+  Description: Join the currently loaded arena. The game must be in COUNTDOWN state (started but not begun). Players are removed from spectator mode, placed at a spawn point, and cannot move until the game begins.
 
 - /hg leave
-  Description: Leave your current arena and return to the lobby.
+  Description: Leave your current arena and return to spectator mode (for non-admin players). Your inventory will be restored.
 
 - /hg stats [player]
   Description: Display kills/deaths/wins/losses for a player or yourself (match-scoped; not persisted across restarts).
@@ -62,6 +65,10 @@ Player Commands (no permission required)
 Notes
 - Tab completion is disabled for now. All subcommands will be listed by `/hg`.
 - Admin commands provide clear error messages when arguments are missing or invalid and instruct admins to load/save working arenas as necessary.
+- Non-admin/non-op players are automatically placed in spectator mode when joining the server.
+- Players cannot break blocks unless they have admin permission or are op.
+- Players cannot move during the COUNTDOWN state (after /hg start but before /hg begin).
+- The game automatically begins when max players is reached.
 
 Next steps
 - Update docs/ARCHITECTURE.md and docs/TODO.md to reflect the working-arena semantics and the need for admins to run `/hg arena save` to persist changes.
