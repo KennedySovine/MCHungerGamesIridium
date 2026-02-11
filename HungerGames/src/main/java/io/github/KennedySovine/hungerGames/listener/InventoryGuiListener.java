@@ -3,16 +3,23 @@ package io.github.KennedySovine.hungerGames.listener;
 import io.github.KennedySovine.hungerGames.HungerGames;
 import io.github.KennedySovine.hungerGames.gui.ArenaEditorGui;
 import io.github.KennedySovine.hungerGames.gui.ArenaListGui;
+import io.github.KennedySovine.hungerGames.gui.SpectatorGui;
+import io.github.KennedySovine.hungerGames.arena.Arena;
 import io.github.KennedySovine.hungerGames.arena.ArenaManager;
+import io.github.KennedySovine.hungerGames.game.GameManager;
+import io.github.KennedySovine.hungerGames.game.GameState;
+import io.github.KennedySovine.hungerGames.spectator.SpectatorManager;
 import io.github.KennedySovine.hungerGames.utils.MessageUtils;
-import org.bukkit.NamespacedKey;
+import org.bukkit.Bukkit;
+import org.bukkit.Material;
+import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.inventory.InventoryClickEvent;
-import org.bukkit.inventory.InventoryHolder;
-import org.bukkit.entity.Player;
 import org.bukkit.inventory.Inventory;
+import org.bukkit.inventory.InventoryHolder;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.meta.SkullMeta;
 
 import java.util.Optional;
 import java.util.Locale;
@@ -29,6 +36,13 @@ public class InventoryGuiListener implements Listener {
     public void onInventoryClick(InventoryClickEvent event) {
         Inventory inv = event.getInventory();
         InventoryHolder holder = inv.getHolder();
+
+        // Handle Spectator GUI clicks
+        if (holder instanceof SpectatorGui.SpectatorHolder) {
+            event.setCancelled(true);
+            handleSpectatorGuiClick(event);
+            return;
+        }
 
         // Handle Arena List GUI clicks (select an arena to load)
         if (holder instanceof ArenaListGui.ListHolder) {
@@ -69,22 +83,11 @@ public class InventoryGuiListener implements Listener {
             return;
         }
 
-        // Handle Set Center click
+        // Handle Set Center click - delegate to the implemented command instead of touching managers here
         if (ArenaEditorGui.SET_CENTER_DISPLAY.equals(disp)) {
-            // Set the working arena center to this player's location
-            ArenaManager mgr = HungerGames.getPlugin(HungerGames.class).getArenaManager();
-            Optional<io.github.KennedySovine.hungerGames.arena.Arena> wa = mgr.getWorkingArena();
-            if (wa.isEmpty()) {
-                MessageUtils.send(clicker, "&cNo working arena loaded. Load or create one first.");
-                return;
-            }
-            wa.get().setLobbyLocation(clicker.getLocation());
-            MessageUtils.send(clicker, "&aSet working arena center to your current location.");
-            // update center beacon
-            String wid = wa.get().getId();
-            HungerGames.getPlugin(HungerGames.class).getParticleManager().showCenter(wid, clicker.getLocation());
-            // refresh spawn beacons relative to new center
-            HungerGames.getPlugin(HungerGames.class).getParticleManager().refreshAllSpawns(wid, wa.get());
+            // run the admin command that sets center for the currently loaded working arena
+            clicker.closeInventory();
+            clicker.performCommand("hg arena setcenter");
             return;
         }
 
@@ -101,18 +104,21 @@ public class InventoryGuiListener implements Listener {
                 return;
             case "Add Spawn Point":
                 // Delegate to existing command (player form)
+                clicker.closeInventory();
                 clicker.performCommand("hg arena addspawn");
                 return;
             case "Remove Spawn Point":
+                clicker.closeInventory();
                 clicker.performCommand("hg arena removespawn");
                 return;
             case "Save Arena":
+                clicker.closeInventory();
                 clicker.performCommand("hg arena save");
                 return;
             case "Load Arena":
                 // open list GUI to pick an arena to load
                 ArenaListGui.openFor(clicker);
-                return;
+                break;
             case "Create Arena":
                 // Open an anvil prompt so the admin can type an arena id (and optional display name separated by a space)
                 AnvilPrompt.open(clicker, "Create Arena - enter id [displayName]", "my_arena Display Name", text -> {
@@ -129,27 +135,76 @@ public class InventoryGuiListener implements Listener {
                         return;
                     }
 
-                    // Create arena and persist; createArena normalizes id internally but we pass lowercase id
-                    boolean ok = HungerGames.getPlugin(HungerGames.class).getArenaManager().createArena(id, display) != null;
-                    if (!ok) {
-                        MessageUtils.send(clicker, "&cArena with id '" + id + "' already exists.");
-                        return;
-                    }
-                    // Save arenas to disk, load into working, set center to player's location, refresh beacons
-                    HungerGames.getPlugin(HungerGames.class).getArenaManager().saveArenas();
-                    HungerGames.getPlugin(HungerGames.class).getArenaManager().loadWorkingArena(id);
-                    HungerGames.getPlugin(HungerGames.class).getArenaManager().getWorkingArena().ifPresent(a -> {
-                        a.setLobbyLocation(clicker.getLocation());
-                        String wid = a.getId();
-                        HungerGames.getPlugin(HungerGames.class).getParticleManager().showCenter(wid, clicker.getLocation());
-                        HungerGames.getPlugin(HungerGames.class).getParticleManager().refreshAllSpawns(wid, a);
-                    });
-                    MessageUtils.send(clicker, "&aCreated and loaded arena: " + id);
+                    // Delegate creation to the existing admin command instead of direct manager calls
+                    clicker.performCommand("hg arena create " + id + " " + display);
                 });
-                return;
+                break;
             default:
                 // unknown item, ignore
-                return;
+                break;
+        }
+    }
+
+    /**
+     * Handles clicks in the spectator GUI.
+     */
+    private void handleSpectatorGuiClick(InventoryClickEvent event) {
+        Player clicker = (Player) event.getWhoClicked();
+        ItemStack clicked = event.getCurrentItem();
+
+        if (clicked == null || !clicked.hasItemMeta()) {
+            return;
+        }
+
+        HungerGames plugin = HungerGames.getPlugin(HungerGames.class);
+        GameManager gameManager = plugin.getGameManager();
+        SpectatorManager spectatorManager = plugin.getSpectatorManager();
+        ArenaManager arenaManager = plugin.getArenaManager();
+
+        Optional<Arena> arenaOpt = arenaManager.getWorkingArena();
+        if (arenaOpt.isEmpty()) {
+            clicker.closeInventory();
+            MessageUtils.send(clicker, "&cNo arena is currently active!");
+            return;
+        }
+
+        Arena arena = arenaOpt.get();
+        String arenaId = arena.getId();
+        GameState state = gameManager.getGameState(arenaId);
+
+        String displayName = clicked.getItemMeta().getDisplayName();
+
+        // Handle LOBBY menu clicks
+        if (state == GameState.LOBBY || state == GameState.COUNTDOWN) {
+            if ("§a§lJOIN".equals(displayName)) {
+                clicker.closeInventory();
+                clicker.performCommand("hg join");
+            } else if ("§b§lSPECTATE".equals(displayName)) {
+                clicker.closeInventory();
+                MessageUtils.send(clicker, "&7You are already spectating.");
+            }
+            return;
+        }
+
+        // Handle RUNNING menu clicks
+        if (state == GameState.RUNNING || state == GameState.DEATHMATCH) {
+            // Handle player head clicks (teleport to player)
+            if (clicked.getType() == Material.PLAYER_HEAD && clicked.getItemMeta() instanceof SkullMeta) {
+                SkullMeta meta = (SkullMeta) clicked.getItemMeta();
+                if (meta.getOwningPlayer() != null) {
+                    Player target = Bukkit.getPlayer(meta.getOwningPlayer().getUniqueId());
+                    if (target != null && target.isOnline()) {
+                        clicker.teleport(target.getLocation());
+                        spectatorManager.setSpectatorTarget(clicker.getUniqueId(), target.getUniqueId());
+                        clicker.closeInventory();
+                        // Update action bar to show who they're spectating
+                        clicker.sendActionBar("§7Currently Spectating: §e" + target.getName());
+                    } else {
+                        MessageUtils.send(clicker, "&cThat player is no longer available.");
+                        clicker.closeInventory();
+                    }
+                }
+            }
         }
     }
 }

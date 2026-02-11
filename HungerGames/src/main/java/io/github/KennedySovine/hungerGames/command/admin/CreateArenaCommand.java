@@ -7,6 +7,10 @@ import io.github.KennedySovine.hungerGames.command.AbstractSubCommand;
 import io.github.KennedySovine.hungerGames.utils.MessageUtils;
 import org.bukkit.command.CommandSender;
 import org.bukkit.plugin.java.JavaPlugin;
+import org.bukkit.NamespacedKey;
+import org.bukkit.persistence.PersistentDataType;
+import org.bukkit.inventory.ItemStack;
+import org.bukkit.entity.Player;
 
 /**
  * /hg arena create <arenaName> [displayName]
@@ -64,6 +68,30 @@ public class CreateArenaCommand extends AbstractSubCommand {
         mgr.saveArenas();
         // Load into working placeholder for further edits
         mgr.loadWorkingArena(created.getId());
+
+        // If a player created this arena, remove any spawn-sticks from their inventory
+        if (sender instanceof Player) {
+            Player p = (Player) sender;
+            NamespacedKey key = new NamespacedKey(HungerGames.getPlugin(HungerGames.class), io.github.KennedySovine.hungerGames.gui.ArenaEditorGui.SPAWN_STICK_KEY_NAME);
+            int removed = 0;
+            for (int i = 0; i < p.getInventory().getSize(); i++) {
+                ItemStack it = p.getInventory().getItem(i);
+                if (it == null || !it.hasItemMeta()) continue;
+                if (it.getItemMeta().getPersistentDataContainer().has(key, PersistentDataType.STRING)) {
+                    p.getInventory().setItem(i, null);
+                    removed++;
+                }
+            }
+            if (removed > 0) {
+                MessageUtils.send(p, "&aRemoved " + removed + " spawn stick(s) from your inventory.");
+                // also check and remove offhand
+                ItemStack off = p.getInventory().getItemInOffHand();
+                if (off != null && off.hasItemMeta() && off.getItemMeta().getPersistentDataContainer().has(key, PersistentDataType.STRING)) {
+                    p.getInventory().setItemInOffHand(null);
+                }
+                p.updateInventory();
+            }
+        }
 
         MessageUtils.send(sender, "&aArena created and loaded for editing: " + created.getId());
         return true;

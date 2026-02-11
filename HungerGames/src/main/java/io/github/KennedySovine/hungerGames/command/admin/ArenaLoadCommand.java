@@ -4,10 +4,12 @@ import io.github.KennedySovine.hungerGames.HungerGames;
 import io.github.KennedySovine.hungerGames.arena.ArenaManager;
 import io.github.KennedySovine.hungerGames.command.AbstractSubCommand;
 import io.github.KennedySovine.hungerGames.utils.MessageUtils;
-import io.github.KennedySovine.hungerGames.utils.ParticleUtils;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.java.JavaPlugin;
+import org.bukkit.NamespacedKey;
+import org.bukkit.persistence.PersistentDataType;
+import org.bukkit.inventory.ItemStack;
 
 /**
  * /hg arena load <arenaName>
@@ -60,6 +62,28 @@ public class ArenaLoadCommand extends AbstractSubCommand {
         if (sender instanceof Player) {
             Player p = (Player) sender;
             mgr.getWorkingArena().ifPresent(a -> a.setLobbyLocation(p.getLocation()));
+
+            // Remove any spawn sticks from the player's inventory now that a new arena is loaded
+            NamespacedKey key = new NamespacedKey(HungerGames.getPlugin(HungerGames.class), io.github.KennedySovine.hungerGames.gui.ArenaEditorGui.SPAWN_STICK_KEY_NAME);
+            int removed = 0;
+            for (int i = 0; i < p.getInventory().getSize(); i++) {
+                ItemStack it = p.getInventory().getItem(i);
+                if (it == null || !it.hasItemMeta()) continue;
+                if (it.getItemMeta().getPersistentDataContainer().has(key, PersistentDataType.STRING)) {
+                    p.getInventory().setItem(i, null);
+                    removed++;
+                }
+            }
+            if (removed > 0) {
+                MessageUtils.send(p, "&aRemoved " + removed + " spawn stick(s) from your inventory.");
+                // also remove from offhand if present
+                ItemStack off = p.getInventory().getItemInOffHand();
+                if (off != null && off.hasItemMeta() && off.getItemMeta().getPersistentDataContainer().has(key, PersistentDataType.STRING)) {
+                    p.getInventory().setItemInOffHand(null);
+                }
+                p.updateInventory();
+            }
+
             MessageUtils.send(sender, "&aLoaded arena into working memory: " + arenaId + " and set center to your current location.");
             // show center beacon (yellow) and refresh spawn beacons
             String wid = mgr.getWorkingArena().map(a -> a.getId()).orElse("");

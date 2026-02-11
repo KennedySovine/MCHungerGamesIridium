@@ -6,6 +6,10 @@ import io.github.KennedySovine.hungerGames.utils.MessageUtils;
 import org.bukkit.command.CommandSender;
 import org.bukkit.plugin.java.JavaPlugin;
 import io.github.KennedySovine.hungerGames.HungerGames;
+import org.bukkit.NamespacedKey;
+import org.bukkit.persistence.PersistentDataType;
+import org.bukkit.entity.Player;
+import org.bukkit.inventory.ItemStack;
 
 /**
  * /hg arena save
@@ -55,6 +59,29 @@ public class ArenaSaveCommand extends AbstractSubCommand {
                 HungerGames.getPlugin(HungerGames.class).getParticleManager().showCenter(id, a.getLobbyLocation());
                 HungerGames.getPlugin(HungerGames.class).getParticleManager().refreshAllSpawns(id, a);
             });
+            // Remove spawn sticks from the command sender if they are a player
+            if (sender instanceof Player) {
+                Player p = (Player) sender;
+                NamespacedKey key = new NamespacedKey(HungerGames.getPlugin(HungerGames.class), io.github.KennedySovine.hungerGames.gui.ArenaEditorGui.SPAWN_STICK_KEY_NAME);
+                int removed = 0;
+                for (int i = 0; i < p.getInventory().getSize(); i++) {
+                    ItemStack it = p.getInventory().getItem(i);
+                    if (it == null || !it.hasItemMeta()) continue;
+                    if (it.getItemMeta().getPersistentDataContainer().has(key, PersistentDataType.STRING)) {
+                        p.getInventory().setItem(i, null);
+                        removed++;
+                    }
+                }
+                if (removed > 0) {
+                    MessageUtils.send(p, "&aRemoved " + removed + " spawn stick(s) from your inventory.");
+                    // also remove offhand
+                    ItemStack off = p.getInventory().getItemInOffHand();
+                    if (off != null && off.hasItemMeta() && off.getItemMeta().getPersistentDataContainer().has(key, PersistentDataType.STRING)) {
+                        p.getInventory().setItemInOffHand(null);
+                    }
+                    p.updateInventory();
+                }
+            }
             MessageUtils.send(sender, "&aWorking arena persisted to disk.");
         } catch (IllegalStateException ex) {
             MessageUtils.send(sender, "&cCannot save: " + ex.getMessage());
