@@ -10,7 +10,7 @@ Testing
 
 How to run locally
 1. Build plugin: `./gradlew build` (Windows: `gradlew.bat build`).
-2. Copy `build/libs/HungerGames-1.0-SNAPSHOT.jar` into server `plugins/` and start Paper server.
+2. Copy `build/libs/HungerGames-{VERSION}.jar` into server `plugins/` and start Paper server.
 
 Persistence
 - Data stored under plugin folder:
