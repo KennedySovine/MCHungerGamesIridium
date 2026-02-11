@@ -228,29 +228,6 @@ public class InventoryGuiListener implements Listener {
                     }
                 }
             }
-            // Handle queue button clicks
-            else if ("§a§lJOIN QUEUE".equals(displayName)) {
-                boolean added = spectatorManager.addToQueue(clicker.getUniqueId());
-                if (added) {
-                    int position = spectatorManager.getQueuePosition(clicker.getUniqueId());
-                    MessageUtils.send(clicker, "&aYou joined the queue! Position: &e" + position);
-                    clicker.closeInventory();
-                    // Reopen to show updated status
-                    Bukkit.getScheduler().runTaskLater(plugin, () -> SpectatorGui.openFor(clicker), 1L);
-                } else {
-                    if (spectatorManager.getQueueSize() >= spectatorManager.getMaxQueueSize()) {
-                        MessageUtils.send(clicker, "&cThe queue is full!");
-                    } else {
-                        MessageUtils.send(clicker, "&cYou are already in the queue!");
-                    }
-                }
-            } else if ("§c§lLEAVE QUEUE".equals(displayName)) {
-                spectatorManager.removeFromQueue(clicker.getUniqueId());
-                MessageUtils.send(clicker, "&7You left the queue.");
-                clicker.closeInventory();
-                // Reopen to show updated status
-                Bukkit.getScheduler().runTaskLater(plugin, () -> SpectatorGui.openFor(clicker), 1L);
-            }
         }
     }
 }

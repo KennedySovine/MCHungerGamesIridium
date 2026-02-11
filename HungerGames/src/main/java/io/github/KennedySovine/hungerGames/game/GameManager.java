@@ -49,34 +49,10 @@ public class GameManager {
     /**
      * Start a game for the given arena (opens it for players to join).
      * Sets the game state to COUNTDOWN. Players can join but cannot move.
-     * Auto-joins players from the queue if available.
      */
     public void startGame(String arenaId) {
         games.put(arenaId, GameState.COUNTDOWN);
         Bukkit.broadcastMessage(MessageUtils.color("&a[HG] Game is now open for joining! Use /hg join to participate."));
-        
-        // Auto-join players from the queue
-        io.github.KennedySovine.hungerGames.spectator.SpectatorManager spectatorManager = plugin.getSpectatorManager();
-        io.github.KennedySovine.hungerGames.arena.ArenaManager arenaManager = plugin.getArenaManager();
-        java.util.Optional<io.github.KennedySovine.hungerGames.arena.Arena> arenaOpt = arenaManager.getWorkingArena();
-        
-        if (arenaOpt.isPresent()) {
-            io.github.KennedySovine.hungerGames.arena.Arena arena = arenaOpt.get();
-            int maxPlayers = arena.getMaxPlayers();
-            
-            // Get players from queue and auto-join them
-            List<UUID> queuedPlayers = spectatorManager.getNextFromQueue(maxPlayers);
-            for (UUID uuid : queuedPlayers) {
-                Player player = Bukkit.getPlayer(uuid);
-                if (player != null && player.isOnline()) {
-                    // Join the player to the game
-                    boolean joined = join(player, arenaId, arena);
-                    if (joined) {
-                        MessageUtils.send(player, "&aYou were automatically added to the game from the queue!");
-                    }
-                }
-            }
-        }
     }
 
     /**
@@ -118,9 +94,6 @@ public class GameManager {
     public boolean join(Player player, String arenaId, io.github.KennedySovine.hungerGames.arena.Arena arena) {
         if (player == null || arenaId == null || arena == null) return false;
         UUID u = player.getUniqueId();
-        
-        // Remove player from queue if they were in it
-        plugin.getSpectatorManager().removeFromQueue(u);
         
         // Get spawn points
         List<Location> spawns = arena.getAbsoluteSpawns(arena.getLobbyLocation());

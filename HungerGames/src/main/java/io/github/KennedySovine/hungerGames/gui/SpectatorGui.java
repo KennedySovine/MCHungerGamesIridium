@@ -136,9 +136,8 @@ public class SpectatorGui {
         }
 
         // Calculate inventory size (must be multiple of 9)
-        // We need space for player heads + bottom row for queue button
         int playerSlots = onlinePlayers.size();
-        int rows = Math.max(2, (int) Math.ceil((playerSlots + 9) / 9.0)); // At least 2 rows
+        int rows = Math.max(1, (int) Math.ceil(playerSlots / 9.0)); // At least 1 row
         int size = rows * 9;
 
         // Create holder and inventory
@@ -147,7 +146,7 @@ public class SpectatorGui {
         holder.setInventory(inv);
 
         // Add player heads
-        for (int i = 0; i < onlinePlayers.size() && i < size - 9; i++) {
+        for (int i = 0; i < onlinePlayers.size() && i < size; i++) {
             Player target = onlinePlayers.get(i);
             ItemStack head = new ItemStack(Material.PLAYER_HEAD);
             if (head.getItemMeta() instanceof SkullMeta) {
@@ -161,32 +160,6 @@ public class SpectatorGui {
             }
             inv.setItem(i, head);
         }
-
-        // Add queue button in the bottom row (slot size - 5, center of bottom row)
-        SpectatorManager spectatorManager = plugin.getSpectatorManager();
-        boolean inQueue = spectatorManager.isInQueue(spectator.getUniqueId());
-        int queueSize = spectatorManager.getQueueSize();
-        int maxQueue = spectatorManager.getMaxQueueSize();
-
-        ItemStack queueItem = new ItemStack(inQueue ? Material.RED_CONCRETE : Material.GREEN_CONCRETE);
-        ItemMeta queueMeta = queueItem.getItemMeta();
-        if (queueMeta != null) {
-            queueMeta.setDisplayName(inQueue ? "§c§lLEAVE QUEUE" : "§a§lJOIN QUEUE");
-            List<String> queueLore = new ArrayList<>();
-            if (inQueue) {
-                int position = spectatorManager.getQueuePosition(spectator.getUniqueId());
-                queueLore.add("§7You are in the queue!");
-                queueLore.add("§7Position: §e" + position + "§7/§e" + queueSize);
-                queueLore.add("§7Click to leave the queue");
-            } else {
-                queueLore.add("§7Join the queue for next game");
-                queueLore.add("§7Queue: §e" + queueSize + "§7/§e" + maxQueue);
-                queueLore.add("§7Click to join the queue");
-            }
-            queueMeta.setLore(queueLore);
-            queueItem.setItemMeta(queueMeta);
-        }
-        inv.setItem(size - 5, queueItem);
 
         spectator.openInventory(inv);
     }

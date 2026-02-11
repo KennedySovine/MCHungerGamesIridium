@@ -12,18 +12,11 @@ import java.util.concurrent.ConcurrentHashMap;
 /**
  * Manages spectator-related functionality including:
  * - Giving spectators a compass item for navigation
- * - Tracking the join queue for the next game
  * - Tracking which player each spectator is currently watching
  */
 public class SpectatorManager {
 
     private final HungerGames plugin;
-    
-    // Queue for players waiting to join the next game (max 100, FIFO)
-    // Using LinkedList with synchronized blocks instead of ConcurrentLinkedQueue
-    // because we need size limits, contains() checks, and indexOf() for position tracking
-    private final LinkedList<UUID> joinQueue = new LinkedList<>();
-    private static final int MAX_QUEUE_SIZE = 100;
     
     // Track which player each spectator is currently spectating (spectatorUUID -> targetPlayerUUID)
     private final Map<UUID, UUID> spectatorTargets = new ConcurrentHashMap<>();
@@ -65,85 +58,6 @@ public class SpectatorManager {
     }
 
     /**
-     * Adds a player to the join queue for the next game.
-     * @return true if successfully added, false if queue is full or player already in queue
-     */
-    public boolean addToQueue(UUID playerUuid) {
-        synchronized (joinQueue) {
-            if (joinQueue.contains(playerUuid)) {
-                return false; // Already in queue
-            }
-            if (joinQueue.size() >= MAX_QUEUE_SIZE) {
-                return false; // Queue is full
-            }
-            joinQueue.addLast(playerUuid);
-            return true;
-        }
-    }
-
-    /**
-     * Removes a player from the join queue.
-     */
-    public void removeFromQueue(UUID playerUuid) {
-        synchronized (joinQueue) {
-            joinQueue.remove(playerUuid);
-        }
-    }
-
-    /**
-     * Checks if a player is in the join queue.
-     */
-    public boolean isInQueue(UUID playerUuid) {
-        synchronized (joinQueue) {
-            return joinQueue.contains(playerUuid);
-        }
-    }
-
-    /**
-     * Gets the position of a player in the queue (1-indexed).
-     * @return position in queue, or -1 if not in queue
-     */
-    public int getQueuePosition(UUID playerUuid) {
-        synchronized (joinQueue) {
-            int pos = joinQueue.indexOf(playerUuid);
-            return pos >= 0 ? pos + 1 : -1;
-        }
-    }
-
-    /**
-     * Gets the current queue size.
-     */
-    public int getQueueSize() {
-        synchronized (joinQueue) {
-            return joinQueue.size();
-        }
-    }
-
-    /**
-     * Gets the next player(s) from the queue to join a game.
-     * @param count number of players to get
-     * @return list of player UUIDs (may be fewer than requested if queue is smaller)
-     */
-    public List<UUID> getNextFromQueue(int count) {
-        List<UUID> result = new ArrayList<>();
-        synchronized (joinQueue) {
-            for (int i = 0; i < count && !joinQueue.isEmpty(); i++) {
-                result.add(joinQueue.removeFirst());
-            }
-        }
-        return result;
-    }
-
-    /**
-     * Clears the entire join queue.
-     */
-    public void clearQueue() {
-        synchronized (joinQueue) {
-            joinQueue.clear();
-        }
-    }
-
-    /**
      * Sets which player a spectator is currently watching.
      */
     public void setSpectatorTarget(UUID spectatorUuid, UUID targetPlayerUuid) {
@@ -167,12 +81,5 @@ public class SpectatorManager {
      */
     public void clearSpectatorTarget(UUID spectatorUuid) {
         spectatorTargets.remove(spectatorUuid);
-    }
-
-    /**
-     * Gets the maximum queue size.
-     */
-    public int getMaxQueueSize() {
-        return MAX_QUEUE_SIZE;
     }
 }
