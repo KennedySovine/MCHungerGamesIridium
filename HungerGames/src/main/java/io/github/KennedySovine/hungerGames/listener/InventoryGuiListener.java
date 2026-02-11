@@ -3,16 +3,24 @@ package io.github.KennedySovine.hungerGames.listener;
 import io.github.KennedySovine.hungerGames.HungerGames;
 import io.github.KennedySovine.hungerGames.gui.ArenaEditorGui;
 import io.github.KennedySovine.hungerGames.gui.ArenaListGui;
+import io.github.KennedySovine.hungerGames.gui.SpectatorGui;
+import io.github.KennedySovine.hungerGames.arena.Arena;
 import io.github.KennedySovine.hungerGames.arena.ArenaManager;
+import io.github.KennedySovine.hungerGames.game.GameManager;
+import io.github.KennedySovine.hungerGames.game.GameState;
+import io.github.KennedySovine.hungerGames.spectator.SpectatorManager;
 import io.github.KennedySovine.hungerGames.utils.MessageUtils;
+import org.bukkit.Bukkit;
+import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
+import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.inventory.InventoryClickEvent;
-import org.bukkit.inventory.InventoryHolder;
-import org.bukkit.entity.Player;
 import org.bukkit.inventory.Inventory;
+import org.bukkit.inventory.InventoryHolder;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.meta.SkullMeta;
 
 import java.util.Optional;
 import java.util.Locale;
@@ -29,6 +37,13 @@ public class InventoryGuiListener implements Listener {
     public void onInventoryClick(InventoryClickEvent event) {
         Inventory inv = event.getInventory();
         InventoryHolder holder = inv.getHolder();
+
+        // Handle Spectator GUI clicks
+        if (holder instanceof SpectatorGui.SpectatorHolder) {
+            event.setCancelled(true);
+            handleSpectatorGuiClick(event);
+            return;
+        }
 
         // Handle Arena List GUI clicks (select an arena to load)
         if (holder instanceof ArenaListGui.ListHolder) {
@@ -150,6 +165,92 @@ public class InventoryGuiListener implements Listener {
             default:
                 // unknown item, ignore
                 return;
+        }
+    }
+
+    /**
+     * Handles clicks in the spectator GUI.
+     */
+    private void handleSpectatorGuiClick(InventoryClickEvent event) {
+        Player clicker = (Player) event.getWhoClicked();
+        ItemStack clicked = event.getCurrentItem();
+        
+        if (clicked == null || !clicked.hasItemMeta()) {
+            return;
+        }
+
+        HungerGames plugin = HungerGames.getPlugin(HungerGames.class);
+        GameManager gameManager = plugin.getGameManager();
+        SpectatorManager spectatorManager = plugin.getSpectatorManager();
+        ArenaManager arenaManager = plugin.getArenaManager();
+        
+        Optional<Arena> arenaOpt = arenaManager.getWorkingArena();
+        if (arenaOpt.isEmpty()) {
+            clicker.closeInventory();
+            MessageUtils.send(clicker, "&cNo arena is currently active!");
+            return;
+        }
+        
+        Arena arena = arenaOpt.get();
+        String arenaId = arena.getId();
+        GameState state = gameManager.getGameState(arenaId);
+        
+        String displayName = clicked.getItemMeta().getDisplayName();
+        
+        // Handle LOBBY menu clicks
+        if (state == GameState.LOBBY || state == GameState.COUNTDOWN) {
+            if ("§a§lJOIN".equals(displayName)) {
+                clicker.closeInventory();
+                clicker.performCommand("hg join");
+            } else if ("§b§lSPECTATE".equals(displayName)) {
+                clicker.closeInventory();
+                MessageUtils.send(clicker, "&7You are already spectating.");
+            }
+            return;
+        }
+        
+        // Handle RUNNING menu clicks
+        if (state == GameState.RUNNING || state == GameState.DEATHMATCH) {
+            // Handle player head clicks (teleport to player)
+            if (clicked.getType() == Material.PLAYER_HEAD) {
+                SkullMeta meta = (SkullMeta) clicked.getItemMeta();
+                if (meta != null && meta.getOwningPlayer() != null) {
+                    Player target = Bukkit.getPlayer(meta.getOwningPlayer().getUniqueId());
+                    if (target != null && target.isOnline()) {
+                        clicker.teleport(target.getLocation());
+                        spectatorManager.setSpectatorTarget(clicker.getUniqueId(), target.getUniqueId());
+                        clicker.closeInventory();
+                        // Update action bar to show who they're spectating
+                        clicker.sendActionBar("§7Currently Spectating: §e" + target.getName());
+                    } else {
+                        MessageUtils.send(clicker, "&cThat player is no longer available.");
+                        clicker.closeInventory();
+                    }
+                }
+            }
+            // Handle queue button clicks
+            else if ("§a§lJOIN QUEUE".equals(displayName)) {
+                boolean added = spectatorManager.addToQueue(clicker.getUniqueId());
+                if (added) {
+                    int position = spectatorManager.getQueuePosition(clicker.getUniqueId());
+                    MessageUtils.send(clicker, "&aYou joined the queue! Position: &e" + position);
+                    clicker.closeInventory();
+                    // Reopen to show updated status
+                    Bukkit.getScheduler().runTaskLater(plugin, () -> SpectatorGui.openFor(clicker), 1L);
+                } else {
+                    if (spectatorManager.getQueueSize() >= spectatorManager.getMaxQueueSize()) {
+                        MessageUtils.send(clicker, "&cThe queue is full!");
+                    } else {
+                        MessageUtils.send(clicker, "&cYou are already in the queue!");
+                    }
+                }
+            } else if ("§c§lLEAVE QUEUE".equals(displayName)) {
+                spectatorManager.removeFromQueue(clicker.getUniqueId());
+                MessageUtils.send(clicker, "&7You left the queue.");
+                clicker.closeInventory();
+                // Reopen to show updated status
+                Bukkit.getScheduler().runTaskLater(plugin, () -> SpectatorGui.openFor(clicker), 1L);
+            }
         }
     }
 }

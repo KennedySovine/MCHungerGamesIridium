@@ -8,6 +8,7 @@ import org.bukkit.Location;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -75,6 +76,8 @@ public class GameManager {
                     // Put non-admin players back in spectator mode
                     if (!p.hasPermission("HungerGames.admin") && !p.isOp()) {
                         p.setGameMode(GameMode.SPECTATOR);
+                        // Give spectator compass back
+                        plugin.getSpectatorManager().giveSpectatorCompass(p);
                     }
                     MessageUtils.send(p, "[HG] Game stopped - your inventory has been restored.");
                 }
@@ -185,6 +188,15 @@ public class GameManager {
     public int getPlayerCount(String arenaId) {
         Set<UUID> players = arenaPlayers.get(arenaId);
         return players != null ? players.size() : 0;
+    }
+    
+    /**
+     * Get the set of player UUIDs currently in an arena.
+     * @return Set of player UUIDs, or empty set if no players
+     */
+    public Set<UUID> getArenaPlayers(String arenaId) {
+        Set<UUID> players = arenaPlayers.get(arenaId);
+        return players != null ? new java.util.HashSet<>(players) : Collections.emptySet();
     }
 
     // --- Hooks used by CombatManager (minimal implementations) ---

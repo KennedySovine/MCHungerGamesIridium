@@ -1,17 +1,22 @@
 package io.github.KennedySovine.hungerGames.listener;
 
+import io.github.KennedySovine.hungerGames.HungerGames;
 import io.github.KennedySovine.hungerGames.combat.CombatManager;
 import io.github.KennedySovine.hungerGames.game.GameManager;
+import io.github.KennedySovine.hungerGames.spectator.SpectatorManager;
+import org.bukkit.Bukkit;
 import org.bukkit.GameMode;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
+import org.bukkit.plugin.java.JavaPlugin;
 
 /**
  * Listener handling player join/quit events and delegating to CombatManager.
- * Also handles putting non-admin players in spectator mode when they join.
+ * Also handles putting non-admin players in spectator mode when they join
+ * and giving them a spectator compass.
  */
 public class PlayerConnectionListener implements Listener {
 
@@ -38,6 +43,13 @@ public class PlayerConnectionListener implements Listener {
         if (!player.hasPermission("HungerGames.admin") && !player.isOp()) {
             if (!gameManager.isPlayerInArena(player.getUniqueId())) {
                 player.setGameMode(GameMode.SPECTATOR);
+                
+                // Give spectator compass after a short delay to ensure inventory is ready
+                HungerGames plugin = JavaPlugin.getPlugin(HungerGames.class);
+                SpectatorManager spectatorManager = plugin.getSpectatorManager();
+                Bukkit.getScheduler().runTaskLater(plugin, () -> {
+                    spectatorManager.giveSpectatorCompass(player);
+                }, 5L);
             }
         }
     }

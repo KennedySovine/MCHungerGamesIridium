@@ -56,9 +56,10 @@ public class LeaveCommand extends AbstractSubCommand {
         // Leave the game
         gameManager.leave(player);
         
-        // Put non-admin players back in spectator mode
+        // Put non-admin players back in spectator mode and give them the compass
         if (!player.hasPermission("HungerGames.admin") && !player.isOp()) {
             player.setGameMode(GameMode.SPECTATOR);
+            plugin.getSpectatorManager().giveSpectatorCompass(player);
         }
         
         return true;

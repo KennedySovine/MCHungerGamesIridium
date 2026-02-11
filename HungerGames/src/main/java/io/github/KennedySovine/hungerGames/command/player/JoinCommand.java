@@ -88,7 +88,10 @@ public class JoinCommand extends AbstractSubCommand {
         
         // Join the game
         boolean success = gameManager.join(player, arenaId, arena);
-        if (!success) {
+        if (success) {
+            // Remove spectator compass when joining the game
+            plugin.getSpectatorManager().removeSpectatorCompass(player);
+        } else {
             MessageUtils.send(player, "&cFailed to join the game. Contact an admin.");
         }
         
