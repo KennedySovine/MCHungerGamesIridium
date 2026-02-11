@@ -76,7 +76,29 @@ public class SpawnStickListener implements Listener {
         }
 
         if (act == Action.RIGHT_CLICK_AIR || act == Action.RIGHT_CLICK_BLOCK) {
-            boolean ok = HungerGames.getPlugin(HungerGames.class).getArenaManager().addSpawnPointToWorking(p.getLocation());
+            var mgr = HungerGames.getPlugin(HungerGames.class).getArenaManager();
+            var wa = mgr.getWorkingArena();
+            if (wa.isEmpty()) {
+                MessageUtils.send(p, "&cNo working arena loaded.");
+                return;
+            }
+            var working = wa.get();
+            Location here = p.getLocation();
+
+            // Check proximity: ensure new spawn is not within 5 blocks of any existing spawn
+            List<Location> spawns = working.getAbsoluteSpawns(working.getLobbyLocation());
+            for (Location s : spawns) {
+                if (s == null) continue;
+                if (!s.getWorld().getName().equals(here.getWorld().getName())) continue;
+                double distance = s.distance(here);
+                if (distance <= 5.0) {
+                    // Do not add spawn; notify player
+                    MessageUtils.send(p, "Spawn point not added. Make sure you are not within 5 blocks of another spawn point and then try again.");
+                    return;
+                }
+            }
+
+            boolean ok = mgr.addSpawnPointToWorking(here);
             if (!ok) {
                 MessageUtils.send(p, "&cFailed to add spawn to working arena. Ensure a working arena is loaded and has a center set.");
                 return;
@@ -84,7 +106,7 @@ public class SpawnStickListener implements Listener {
             // register spawn beacon via ParticleManager
             String wid = HungerGames.getPlugin(HungerGames.class).getArenaManager().getWorkingArena().map(a -> a.getId()).orElse("");
             int idx = HungerGames.getPlugin(HungerGames.class).getArenaManager().getWorkingArena().map(a -> a.getSpawnOffsets().size()-1).orElse(0);
-            HungerGames.getPlugin(HungerGames.class).getParticleManager().showSpawn(wid, idx, p.getLocation());
+            HungerGames.getPlugin(HungerGames.class).getParticleManager().showSpawn(wid, idx, here);
             MessageUtils.send(p, "&aSpawn added at your location (relative offset saved in working arena). Use '/hg arena save' to persist.");
             return;
         }
