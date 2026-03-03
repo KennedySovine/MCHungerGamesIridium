@@ -11,6 +11,7 @@ import io.github.KennedySovine.hungerGames.command.admin.*;
 import io.github.KennedySovine.hungerGames.command.player.*;
 import io.github.KennedySovine.hungerGames.listener.*;
 import org.bukkit.plugin.java.JavaPlugin;
+import io.github.KennedySovine.hungerGames.spectator.SpectatorManager;
 
 public final class HungerGames extends JavaPlugin {
 
@@ -24,6 +25,7 @@ public final class HungerGames extends JavaPlugin {
     private StatsManager statsManager;
     private io.github.KennedySovine.hungerGames.utils.ParticleManager particleManager;
     private io.github.KennedySovine.hungerGames.utils.BorderManager borderManager;
+    private SpectatorManager spectatorManager;
 
     @Override
     public void onEnable() {
@@ -35,6 +37,7 @@ public final class HungerGames extends JavaPlugin {
         this.statsManager = new StatsManager(this);
         this.particleManager = new io.github.KennedySovine.hungerGames.utils.ParticleManager(this);
         this.borderManager = new io.github.KennedySovine.hungerGames.utils.BorderManager(this);
+        this.spectatorManager = new SpectatorManager();
 
         // Load arenas from disk
         arenaManager.loadArenas();
@@ -115,4 +118,6 @@ public final class HungerGames extends JavaPlugin {
     public YamlStorage getStorage() {
         return storage;
     }
+
+    public SpectatorManager getSpectatorManager() { return spectatorManager; }
 }

@@ -53,7 +53,7 @@ public class RemoveSpawnCommand extends AbstractSubCommand {
         ArenaManager mgr = JavaPlugin.getPlugin(HungerGames.class).getArenaManager();
         Optional<Arena> workingOpt = mgr.getWorkingArena();
         if (workingOpt.isEmpty()) {
-            sender.sendMessage("&cNo working arena loaded. Use '/hg arena load <arena>' or '/hg arena create <arena>' first.");
+            MessageUtils.send(sender, "&cNo working arena loaded. Use '/hg arena load <arena>' or '/hg arena create <arena>' first.");
             return true;
         }
         Arena working = workingOpt.get();
@@ -62,7 +62,7 @@ public class RemoveSpawnCommand extends AbstractSubCommand {
         if (args.length == 0) {
             Optional<Player> pOpt = asPlayer(sender);
             if (pOpt.isEmpty()) {
-                sender.sendMessage("&cThis form requires a player to be the command sender when no index is provided.");
+                MessageUtils.send(sender, "&cThis form requires a player to be the command sender when no index is provided.");
                 return true;
             }
             Player player = pOpt.get();
@@ -82,7 +82,7 @@ public class RemoveSpawnCommand extends AbstractSubCommand {
             }
 
             if (found == -1) {
-                sender.sendMessage("&cNo spawn point found near your current location in the working arena " + working.getId());
+                MessageUtils.send(sender, "&cNo spawn point found near your current location in the working arena " + working.getId());
                 return true;
             }
 
@@ -117,7 +117,7 @@ public class RemoveSpawnCommand extends AbstractSubCommand {
         }
 
         // Any other form is invalid
-        sender.sendMessage("&cUsage: " + usage());
+        MessageUtils.send(sender, "&cUsage: " + usage());
         return true;
     }
 }

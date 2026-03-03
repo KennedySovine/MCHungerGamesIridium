@@ -4,6 +4,7 @@ import io.github.KennedySovine.hungerGames.HungerGames;
 import io.github.KennedySovine.hungerGames.arena.Arena;
 import io.github.KennedySovine.hungerGames.arena.ArenaManager;
 import io.github.KennedySovine.hungerGames.command.AbstractSubCommand;
+import io.github.KennedySovine.hungerGames.utils.MessageUtils;
 import org.bukkit.command.CommandSender;
 import org.bukkit.plugin.java.JavaPlugin;
 
@@ -41,14 +42,14 @@ public class TimeCommand extends AbstractSubCommand {
     @Override
     public boolean execute(CommandSender sender, String[] args) {
         if (args.length != 1) {
-            sender.sendMessage("&cUsage: " + usage() + " — this command only accepts a single <timeInSeconds> and operates on the loaded working arena.");
+            MessageUtils.send(sender, "&cUsage: " + usage() + " — this command only accepts a single <timeInSeconds> and operates on the loaded working arena.");
             return true;
         }
 
         ArenaManager mgr = JavaPlugin.getPlugin(HungerGames.class).getArenaManager();
         Optional<Arena> workingOpt = mgr.getWorkingArena();
         if (workingOpt.isEmpty()) {
-            sender.sendMessage("&cNo working arena loaded. Use '/hg arena load <arena>' or '/hg arena create <arena>' first.");
+            MessageUtils.send(sender, "&cNo working arena loaded. Use '/hg arena load <arena>' or '/hg arena create <arena>' first.");
             return true;
         }
         Arena working = workingOpt.get();
@@ -57,12 +58,12 @@ public class TimeCommand extends AbstractSubCommand {
         if (tOpt.isEmpty()) return true;
         int t = tOpt.get();
         if (t < 0) {
-            sender.sendMessage("&cTime must be non-negative.");
+            MessageUtils.send(sender, "&cTime must be non-negative.");
             return true;
         }
 
         working.setTimeToShrinkSeconds(t);
-        sender.sendMessage("&aSet time-to-shrink for working arena " + working.getId() + " to " + t + " seconds (in-memory). Use '/hg arena save' to persist.");
+        MessageUtils.send(sender, "&aSet time-to-shrink for working arena " + working.getId() + " to " + t + " seconds (in-memory). Use '/hg arena save' to persist.");
         return true;
     }
 }

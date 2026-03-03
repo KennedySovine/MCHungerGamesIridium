@@ -4,6 +4,7 @@ import io.github.KennedySovine.hungerGames.HungerGames;
 import io.github.KennedySovine.hungerGames.arena.Arena;
 import io.github.KennedySovine.hungerGames.arena.ArenaManager;
 import io.github.KennedySovine.hungerGames.command.AbstractSubCommand;
+import io.github.KennedySovine.hungerGames.utils.MessageUtils;
 import org.bukkit.command.CommandSender;
 import org.bukkit.plugin.java.JavaPlugin;
 
@@ -45,14 +46,14 @@ public class MaxPlayersCommand extends AbstractSubCommand {
     @Override
     public boolean execute(CommandSender sender, String[] args) {
         if (args.length != 1) {
-            sender.sendMessage("&cUsage: " + usage() + " — this command only accepts a single <number> and operates on the loaded working arena.");
+            MessageUtils.send(sender, "&cUsage: " + usage() + " — this command only accepts a single <number> and operates on the loaded working arena.");
             return true;
         }
 
         ArenaManager mgr = JavaPlugin.getPlugin(HungerGames.class).getArenaManager();
         Optional<Arena> workingOpt = mgr.getWorkingArena();
         if (workingOpt.isEmpty()) {
-            sender.sendMessage("&cNo working arena loaded. Use '/hg arena load <arena>' or '/hg arena create <arena>' first.");
+            MessageUtils.send(sender, "&cNo working arena loaded. Use '/hg arena load <arena>' or '/hg arena create <arena>' first.");
             return true;
         }
         Arena working = workingOpt.get();
@@ -61,12 +62,12 @@ public class MaxPlayersCommand extends AbstractSubCommand {
         if (numOpt.isEmpty()) return true;
         int num = numOpt.get();
         if (num <= 0) {
-            sender.sendMessage("&cMax players must be positive.");
+            MessageUtils.send(sender, "&cMax players must be positive.");
             return true;
         }
 
         working.setMaxPlayers(num);
-        sender.sendMessage("&aSet max players for working arena " + working.getId() + " to " + num + " (in-memory). Use '/hg arena save' to persist.");
+        MessageUtils.send(sender, "&aSet max players for working arena " + working.getId() + " to " + num + " (in-memory). Use '/hg arena save' to persist.");
         return true;
     }
 }

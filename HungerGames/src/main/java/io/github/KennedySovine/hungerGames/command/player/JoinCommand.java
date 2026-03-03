@@ -1,6 +1,7 @@
 package io.github.KennedySovine.hungerGames.command.player;
 
 import io.github.KennedySovine.hungerGames.command.AbstractSubCommand;
+import io.github.KennedySovine.hungerGames.utils.MessageUtils;
 import org.bukkit.command.CommandSender;
 import java.util.Collections;
 import java.util.List;
@@ -33,7 +34,7 @@ public class JoinCommand extends AbstractSubCommand {
 
     @Override
     public boolean execute(CommandSender sender, String[] args) {
-        sender.sendMessage("[HG] Skeleton JoinCommand. Implement join logic here.");
+        MessageUtils.send(sender, "[HG] Skeleton JoinCommand. Implement join logic here.");
         return true;
     }
 
@@ -42,4 +43,3 @@ public class JoinCommand extends AbstractSubCommand {
         return Collections.emptyList();
     }
 }
-
