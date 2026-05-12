@@ -1,6 +1,8 @@
 package io.github.KennedySovine.hungerGames.game;
 
 import io.github.KennedySovine.hungerGames.HungerGames;
+import io.github.KennedySovine.hungerGames.arena.Arena;
+import io.github.KennedySovine.hungerGames.chest.ChestLootManager;
 import io.github.KennedySovine.hungerGames.utils.MessageUtils;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
@@ -24,6 +26,9 @@ public class GameManager {
 
     private final HungerGames plugin;
     private final Map<String, GameState> games = new ConcurrentHashMap<>();
+    private final Map<String, Integer> chestRefillTaskIds = new ConcurrentHashMap<>();
+    private final Map<String, Integer> chestRefillCycles = new ConcurrentHashMap<>();
+    private final ChestLootManager chestLootManager;
 
     // arenaId -> set of player UUIDs participating (lobby or running)
     private final Map<String, Set<UUID>> arenaPlayers = new ConcurrentHashMap<>();
@@ -37,6 +42,7 @@ public class GameManager {
 
     public GameManager(HungerGames plugin) {
         this.plugin = plugin;
+        this.chestLootManager = new ChestLootManager(plugin);
     }
 
     /**
@@ -45,6 +51,7 @@ public class GameManager {
     public void startGame(String arenaId) {
         // TODO: schedule countdown -> running transitions and chest/border tasks
         games.put(arenaId, GameState.COUNTDOWN);
+        scheduleChestRefills(arenaId);
         Bukkit.broadcastMessage("[HG] Starting game for arena: " + arenaId);
     }
 
@@ -53,6 +60,8 @@ public class GameManager {
      */
     public void stopGame(String arenaId) {
         games.put(arenaId, GameState.FINISHED);
+        cancelChestRefillTask(arenaId);
+        chestRefillCycles.remove(arenaId);
         // Remove all tracked players from this arena and restore any saved inventories
         Set<UUID> players = arenaPlayers.remove(arenaId);
         if (players != null) {
@@ -165,5 +174,54 @@ public class GameManager {
 
         // Otherwise, inform they were killed or need manual handling
         MessageUtils.send(p, "[HG] Welcome back. If you were marked dead while offline, you'll see spectator/death UI (to be implemented).");
+    }
+
+    private void scheduleChestRefills(String arenaId) {
+        Arena arena = resolveArena(arenaId);
+        if (arena == null || arena.getLobbyLocation() == null) return;
+
+        cancelChestRefillTask(arenaId);
+        chestRefillCycles.put(arenaId, 0);
+
+        int initialRefilled = chestLootManager.refillArenaChests(arena, ChestLootManager.LootStage.EARLY);
+        if (initialRefilled > 0) {
+            Bukkit.broadcastMessage(MessageUtils.color("&e[HG] Chests have been stocked with starter loot (" + initialRefilled + " chests)."));
+        }
+
+        int refillSeconds = arena.getChestRefillSeconds();
+        if (refillSeconds <= 0) {
+            plugin.getLogger().info("Chest refill disabled for arena " + arenaId + " (interval <= 0).");
+            return;
+        }
+
+        int taskId = Bukkit.getScheduler().scheduleSyncRepeatingTask(plugin, () -> {
+            GameState state = games.getOrDefault(arenaId, GameState.FINISHED);
+            if (state == GameState.FINISHED) {
+                cancelChestRefillTask(arenaId);
+                return;
+            }
+
+            int cycle = chestRefillCycles.merge(arenaId, 1, Integer::sum);
+            ChestLootManager.LootStage stage = cycle >= 2 ? ChestLootManager.LootStage.LATE : ChestLootManager.LootStage.MID;
+            int refilled = chestLootManager.refillArenaChests(arena, stage);
+            if (refilled > 0) {
+                String tier = stage == ChestLootManager.LootStage.LATE ? "high-tier" : "improved";
+                Bukkit.broadcastMessage(MessageUtils.color("&6[HG] Chests have refilled with " + tier + " loot (" + refilled + " chests)."));
+            }
+        }, refillSeconds * 20L, refillSeconds * 20L);
+        chestRefillTaskIds.put(arenaId, taskId);
+    }
+
+    private void cancelChestRefillTask(String arenaId) {
+        Integer taskId = chestRefillTaskIds.remove(arenaId);
+        if (taskId != null) Bukkit.getScheduler().cancelTask(taskId);
+    }
+
+    private Arena resolveArena(String arenaId) {
+        if (arenaId == null) return null;
+        var arenaManager = plugin.getArenaManager();
+        var working = arenaManager.getWorkingArena();
+        if (working.isPresent() && arenaId.equalsIgnoreCase(working.get().getId())) return working.get();
+        return arenaManager.getArena(arenaId).orElse(null);
     }
 }

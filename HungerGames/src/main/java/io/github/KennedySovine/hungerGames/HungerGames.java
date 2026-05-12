@@ -29,6 +29,8 @@ public final class HungerGames extends JavaPlugin {
     @Override
     public void onEnable() {
         // Plugin startup logic
+        saveDefaultConfig();
+        saveResource("chest-loot.yml", false);
         this.storage = new YamlStorage(this);
         this.arenaManager = new ArenaManager(this);
         this.gameManager = new GameManager(this);

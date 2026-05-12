@@ -15,7 +15,8 @@ How to run locally
 Persistence
 - Data stored under plugin folder:
   - `arenas.yml` — arena definitions with relative spawn offsets
-  - `config.yml` — global settings and chest loot tables
+  - `config.yml` — global settings
+  - `chest-loot.yml` — chest refill loot tables
   - `stats.yml` — player statistics (match-scoped, non-persistent)
 
 Style rules for files created by this project

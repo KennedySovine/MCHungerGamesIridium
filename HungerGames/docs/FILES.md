@@ -71,7 +71,8 @@ GUI (inventory-based interfaces)
 
 Resources (configuration files)
 - ✅ src/main/resources/plugin.yml (fully configured with commands and permissions)
-- ✅ src/main/resources/config.yml (global settings + commented chest loot examples)
+- ✅ src/main/resources/config.yml (global settings)
+- ✅ src/main/resources/chest-loot.yml (staged chest refill loot tables)
 - (Generated at runtime) arenas.yml (created on first arena save)
 
 Docs (all updated)

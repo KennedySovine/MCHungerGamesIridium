@@ -21,7 +21,7 @@ For each package, a description of responsibilities and the key classes implemen
 - **PlayerStats** — Data model for player statistics.
 
 **io.github.KennedySovine.hungerGames.chest** ⚠️
-- **ChestLootManager** — Reads chest loot tables from config.yml, provides weighted random item selection (needs completion).
+- **ChestLootManager** — Reads chest loot tables from chest-loot.yml, provides weighted random item selection.
 
 **io.github.KennedySovine.hungerGames.command** ✅
 - **HgCommand** — Central command dispatcher for `/hg` command.

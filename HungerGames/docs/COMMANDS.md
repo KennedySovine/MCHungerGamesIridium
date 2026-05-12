@@ -52,7 +52,7 @@ Admin Commands (permission: hungergames.admin)
   Description: Set the working arena's grace period for disconnects (in-memory). Default is 120 seconds. Use `/hg arena save` to persist.
 
 - `/hg chestrefill <timeInSeconds>` ✅ IMPLEMENTED
-  Description: Set the working arena's chest-refill interval (in-memory). Use `/hg arena save` to persist.
+  Description: Set the working arena's chest-refill interval (in-memory). `300` seconds (5 minutes) is the standard default pacing. Set to `0` to disable automatic refill scheduling. Use `/hg arena save` to persist.
 
 **Game Control Commands**
 
