@@ -29,6 +29,7 @@ public final class HungerGames extends JavaPlugin {
     @Override
     public void onEnable() {
         // Plugin startup logic
+        saveDefaultConfig();
         this.storage = new YamlStorage(this);
         this.arenaManager = new ArenaManager(this);
         this.gameManager = new GameManager(this);

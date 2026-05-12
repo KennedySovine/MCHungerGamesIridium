@@ -60,36 +60,35 @@ combat:
   timeoutSeconds: 10        # Combat window duration
   defaultGraceSeconds: 120  # Default grace period
 
-# Chest loot configuration (commented examples)
+# Chest loot configuration (editable staged table)
 chest-loot:
-  # Uncomment and configure as needed
-  # starter:
-  #   - material: IRON_SWORD
-  #     min: 1
-  #     max: 1
-  #     weight: 50
-  #     enchants:
-  #       SHARPNESS: 1
-  #   - material: APPLE
-  #     min: 2
-  #     max: 5
-  #     weight: 100
-  # refill:
-  #   - material: GOLDEN_APPLE
-  #     min: 1
-  #     max: 2
-  #     weight: 30
-  #   - material: ARROW
-  #     min: 16
-  #     max: 64
-  #     weight: 80
+  early:
+    min-rolls: 3
+    max-rolls: 6
+    enchant-chance: 0.10
+    items:
+      - material: STONE_SWORD
+        min: 1
+        max: 1
+        weight: 6
+        enchants: [ "SHARPNESS:1" ]
+  mid:
+    min-rolls: 4
+    max-rolls: 7
+    enchant-chance: 0.20
+    items: [ ... ]
+  late:
+    min-rolls: 5
+    max-rolls: 8
+    enchant-chance: 0.33
+    items: [ ... ]
 ```
 
 **Key Features:**
 - Weighted random item selection
-- Multiple loot tiers (starter, refill, etc.)
+- Multiple editable loot tiers (early, mid, late)
 - Enchantment support
-- Commented examples for easy configuration
+- Direct runtime configuration in plugins/HungerGames/config.yml
 
 **Managed By:** `ChestLootManager`
 
