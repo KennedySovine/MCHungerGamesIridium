@@ -297,7 +297,7 @@ public class ChestLootManager {
     }
 
     private LootTable defaultMidTable() {
-        List<LootEntry> entries = new ArrayList<>(defaultEarlyTable().entries);
+        List<LootEntry> entries = copyEntriesWithEnchantChance(defaultEarlyTable().entries, 0.20);
         add(entries, Material.IRON_SWORD, 1, 1, 4, 0.20, "SHARPNESS:1");
         add(entries, Material.IRON_AXE, 1, 1, 3, 0.20, "SHARPNESS:1");
         add(entries, Material.CROSSBOW, 1, 1, 2, 0.20, "QUICK_CHARGE:1");
@@ -306,7 +306,7 @@ public class ChestLootManager {
     }
 
     private LootTable defaultLateTable() {
-        List<LootEntry> entries = new ArrayList<>(defaultMidTable().entries);
+        List<LootEntry> entries = copyEntriesWithEnchantChance(defaultMidTable().entries, 0.33);
         add(entries, Material.DIAMOND_SWORD, 1, 1, 2, 0.33, "SHARPNESS:2");
         add(entries, Material.DIAMOND_HELMET, 1, 1, 1, 0.33, "PROTECTION:2");
         add(entries, Material.DIAMOND_CHESTPLATE, 1, 1, 1, 0.33, "PROTECTION:2");
@@ -333,5 +333,22 @@ public class ChestLootManager {
             }
         }
         entries.add(new LootEntry(material, min, max, weight, clampChance(enchantChance), parsed));
+    }
+
+    private List<LootEntry> copyEntriesWithEnchantChance(List<LootEntry> source, double enchantChance) {
+        List<LootEntry> out = new ArrayList<>(source.size());
+        double clamped = clampChance(enchantChance);
+        for (LootEntry entry : source) {
+            double chance = entry.enchants.isEmpty() ? 0 : clamped;
+            out.add(new LootEntry(
+                    entry.material,
+                    entry.minAmount,
+                    entry.maxAmount,
+                    entry.weight,
+                    chance,
+                    new ArrayList<>(entry.enchants)
+            ));
+        }
+        return out;
     }
 }
