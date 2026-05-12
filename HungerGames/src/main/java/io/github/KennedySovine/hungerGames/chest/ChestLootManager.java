@@ -9,6 +9,7 @@ import org.bukkit.block.BlockState;
 import org.bukkit.block.Chest;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.FileConfiguration;
+import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
@@ -17,13 +18,14 @@ import org.bukkit.plugin.Plugin;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.io.File;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ThreadLocalRandom;
 
 /**
  * Populates and refills arena chests with progressive loot tiers.
- * Loot table is loaded from config.yml under chest-loot.{early|mid|late}.
+ * Loot table is loaded from chest-loot.yml under chest-loot.{early|mid|late}.
  */
 public class ChestLootManager {
     private static final double CUSTOM_BORDER_THRESHOLD = 10_000_000D;
@@ -77,10 +79,21 @@ public class ChestLootManager {
     }
 
     public void reload() {
-        FileConfiguration cfg = plugin.getConfig();
+        FileConfiguration cfg = loadLootConfig();
         this.earlyTable = loadTable(cfg, "chest-loot.early", defaultEarlyTable());
         this.midTable = loadTable(cfg, "chest-loot.mid", defaultMidTable());
         this.lateTable = loadTable(cfg, "chest-loot.late", defaultLateTable());
+    }
+
+    private FileConfiguration loadLootConfig() {
+        File file = new File(plugin.getDataFolder(), "chest-loot.yml");
+        if (!file.exists()) {
+            plugin.saveResource("chest-loot.yml", false);
+        }
+        if (!file.exists()) {
+            return new YamlConfiguration();
+        }
+        return YamlConfiguration.loadConfiguration(file);
     }
 
     public void populateChest(Inventory inv) {

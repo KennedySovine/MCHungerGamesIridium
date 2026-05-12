@@ -113,7 +113,7 @@ Player Disconnects?
 
 ### ChestLootManager ⚠️
 **Responsibilities:**
-- Reads chest loot configurations from `config.yml`
+- Reads chest loot configurations from `chest-loot.yml`
 - Provides weighted random item selection
 - Supports multiple loot tiers (starter, refill)
 
@@ -127,7 +127,8 @@ Player Disconnects?
 
 **Persisted Files:**
 - `arenas.yml` - Arena configurations (master data)
-- `config.yml` - Global settings and loot tables
+- `config.yml` - Global settings
+- `chest-loot.yml` - Chest refill loot tables
 
 ### Additional Components ✅
 - **ParticleManager** - Spawn beacon visualization

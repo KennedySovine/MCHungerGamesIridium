@@ -72,11 +72,11 @@ This document lists the manager classes required for the plugin and the responsi
 
 **ChestLootManager** (io.github.KennedySovine.hungerGames.chest) ⚠️ PARTIAL
 - Responsibilities:
-  - Read `config.yml` chest-loot mapping and provide a method to populate a chest `Inventory`
+  - Read `chest-loot.yml` chest-loot mapping and provide a method to populate a chest `Inventory`
   - Weighted random selection of items
   - Support multiple tiers (starter, refill)
 - Implemented public API:
-  - `void loadLootTables()` - Load from config.yml
+  - `void loadLootTables()` - Load from chest-loot.yml
   - `void populateChest(Inventory inventory, String tier)` - Populate with weighted random items
 - Status: Framework created; weighted random selection needs completion
 

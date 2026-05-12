@@ -1,0 +1,328 @@
+# HungerGames chest loot configuration.
+# Edit plugins/HungerGames/chest-loot.yml on your server to customize loot.
+#
+# chest-loot has 3 stages:
+# - early: used when match starts
+# - mid: first refill
+# - late: second+ refill
+#
+# Fields:
+# - min-rolls / max-rolls: number of item picks per chest
+# - enchant-chance: default enchant chance (0.0-1.0) for entries with enchants
+# - items:
+#   - material: Bukkit material name
+#     min/max: amount range
+#     weight: relative rarity (higher = more common)
+#     enchant-chance: optional per-item override
+#     enchants: optional list "ENCHANT_NAME:level"
+
+chest-loot:
+  early:
+    min-rolls: 3
+    max-rolls: 6
+    enchant-chance: 0.10
+    items:
+      - material: WOODEN_SWORD
+        min: 1
+        max: 1
+        weight: 8
+        enchants: [ "SHARPNESS:1" ]
+      - material: STONE_SWORD
+        min: 1
+        max: 1
+        weight: 6
+        enchants: [ "SHARPNESS:1" ]
+      - material: BOW
+        min: 1
+        max: 1
+        weight: 4
+        enchants: [ "POWER:1" ]
+      - material: ARROW
+        min: 4
+        max: 12
+        weight: 9
+      - material: BREAD
+        min: 1
+        max: 3
+        weight: 10
+      - material: COOKED_BEEF
+        min: 1
+        max: 2
+        weight: 7
+      - material: LEATHER_HELMET
+        min: 1
+        max: 1
+        weight: 5
+      - material: LEATHER_CHESTPLATE
+        min: 1
+        max: 1
+        weight: 5
+      - material: LEATHER_LEGGINGS
+        min: 1
+        max: 1
+        weight: 5
+      - material: LEATHER_BOOTS
+        min: 1
+        max: 1
+        weight: 5
+      - material: CHAINMAIL_HELMET
+        min: 1
+        max: 1
+        weight: 3
+      - material: CHAINMAIL_CHESTPLATE
+        min: 1
+        max: 1
+        weight: 3
+      - material: CHAINMAIL_LEGGINGS
+        min: 1
+        max: 1
+        weight: 3
+      - material: CHAINMAIL_BOOTS
+        min: 1
+        max: 1
+        weight: 3
+      - material: IRON_HELMET
+        min: 1
+        max: 1
+        weight: 2
+      - material: IRON_CHESTPLATE
+        min: 1
+        max: 1
+        weight: 1
+      - material: IRON_LEGGINGS
+        min: 1
+        max: 1
+        weight: 1
+      - material: IRON_BOOTS
+        min: 1
+        max: 1
+        weight: 2
+
+  mid:
+    min-rolls: 4
+    max-rolls: 7
+    enchant-chance: 0.20
+    items:
+      - material: WOODEN_SWORD
+        min: 1
+        max: 1
+        weight: 8
+        enchants: [ "SHARPNESS:1" ]
+      - material: STONE_SWORD
+        min: 1
+        max: 1
+        weight: 6
+        enchants: [ "SHARPNESS:1" ]
+      - material: BOW
+        min: 1
+        max: 1
+        weight: 4
+        enchants: [ "POWER:1" ]
+      - material: ARROW
+        min: 4
+        max: 12
+        weight: 9
+      - material: BREAD
+        min: 1
+        max: 3
+        weight: 10
+      - material: COOKED_BEEF
+        min: 1
+        max: 2
+        weight: 7
+      - material: LEATHER_HELMET
+        min: 1
+        max: 1
+        weight: 5
+      - material: LEATHER_CHESTPLATE
+        min: 1
+        max: 1
+        weight: 5
+      - material: LEATHER_LEGGINGS
+        min: 1
+        max: 1
+        weight: 5
+      - material: LEATHER_BOOTS
+        min: 1
+        max: 1
+        weight: 5
+      - material: CHAINMAIL_HELMET
+        min: 1
+        max: 1
+        weight: 3
+      - material: CHAINMAIL_CHESTPLATE
+        min: 1
+        max: 1
+        weight: 3
+      - material: CHAINMAIL_LEGGINGS
+        min: 1
+        max: 1
+        weight: 3
+      - material: CHAINMAIL_BOOTS
+        min: 1
+        max: 1
+        weight: 3
+      - material: IRON_HELMET
+        min: 1
+        max: 1
+        weight: 2
+      - material: IRON_CHESTPLATE
+        min: 1
+        max: 1
+        weight: 1
+      - material: IRON_LEGGINGS
+        min: 1
+        max: 1
+        weight: 1
+      - material: IRON_BOOTS
+        min: 1
+        max: 1
+        weight: 2
+      - material: IRON_SWORD
+        min: 1
+        max: 1
+        weight: 4
+        enchants: [ "SHARPNESS:1" ]
+      - material: IRON_AXE
+        min: 1
+        max: 1
+        weight: 3
+        enchants: [ "SHARPNESS:1" ]
+      - material: CROSSBOW
+        min: 1
+        max: 1
+        weight: 2
+        enchants: [ "QUICK_CHARGE:1" ]
+      - material: GOLDEN_APPLE
+        min: 1
+        max: 1
+        weight: 2
+
+  late:
+    min-rolls: 5
+    max-rolls: 8
+    enchant-chance: 0.33
+    items:
+      - material: WOODEN_SWORD
+        min: 1
+        max: 1
+        weight: 8
+        enchants: [ "SHARPNESS:1" ]
+      - material: STONE_SWORD
+        min: 1
+        max: 1
+        weight: 6
+        enchants: [ "SHARPNESS:1" ]
+      - material: BOW
+        min: 1
+        max: 1
+        weight: 4
+        enchants: [ "POWER:1" ]
+      - material: ARROW
+        min: 4
+        max: 12
+        weight: 9
+      - material: BREAD
+        min: 1
+        max: 3
+        weight: 10
+      - material: COOKED_BEEF
+        min: 1
+        max: 2
+        weight: 7
+      - material: LEATHER_HELMET
+        min: 1
+        max: 1
+        weight: 5
+      - material: LEATHER_CHESTPLATE
+        min: 1
+        max: 1
+        weight: 5
+      - material: LEATHER_LEGGINGS
+        min: 1
+        max: 1
+        weight: 5
+      - material: LEATHER_BOOTS
+        min: 1
+        max: 1
+        weight: 5
+      - material: CHAINMAIL_HELMET
+        min: 1
+        max: 1
+        weight: 3
+      - material: CHAINMAIL_CHESTPLATE
+        min: 1
+        max: 1
+        weight: 3
+      - material: CHAINMAIL_LEGGINGS
+        min: 1
+        max: 1
+        weight: 3
+      - material: CHAINMAIL_BOOTS
+        min: 1
+        max: 1
+        weight: 3
+      - material: IRON_HELMET
+        min: 1
+        max: 1
+        weight: 2
+      - material: IRON_CHESTPLATE
+        min: 1
+        max: 1
+        weight: 1
+      - material: IRON_LEGGINGS
+        min: 1
+        max: 1
+        weight: 1
+      - material: IRON_BOOTS
+        min: 1
+        max: 1
+        weight: 2
+      - material: IRON_SWORD
+        min: 1
+        max: 1
+        weight: 4
+        enchants: [ "SHARPNESS:1" ]
+      - material: IRON_AXE
+        min: 1
+        max: 1
+        weight: 3
+        enchants: [ "SHARPNESS:1" ]
+      - material: CROSSBOW
+        min: 1
+        max: 1
+        weight: 2
+        enchants: [ "QUICK_CHARGE:1" ]
+      - material: DIAMOND_SWORD
+        min: 1
+        max: 1
+        weight: 2
+        enchants: [ "SHARPNESS:2" ]
+      - material: DIAMOND_HELMET
+        min: 1
+        max: 1
+        weight: 1
+        enchants: [ "PROTECTION:2" ]
+      - material: DIAMOND_CHESTPLATE
+        min: 1
+        max: 1
+        weight: 1
+        enchants: [ "PROTECTION:2" ]
+      - material: DIAMOND_LEGGINGS
+        min: 1
+        max: 1
+        weight: 1
+        enchants: [ "PROTECTION:2" ]
+      - material: DIAMOND_BOOTS
+        min: 1
+        max: 1
+        weight: 1
+        enchants: [ "PROTECTION:2" ]
+      - material: GOLDEN_APPLE
+        min: 1
+        max: 1
+        weight: 3
+      - material: ENCHANTED_GOLDEN_APPLE
+        min: 1
+        max: 1
+        weight: 1

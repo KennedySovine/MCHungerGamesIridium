@@ -51,7 +51,7 @@ arenas:
 **Managed By:** `ArenaManager`
 
 ### config.yml ✅
-**Purpose:** Global plugin settings and chest loot tables
+**Purpose:** Global plugin settings
 
 **Structure:**
 ```yaml
@@ -60,18 +60,20 @@ combat:
   timeoutSeconds: 10        # Combat window duration
   defaultGraceSeconds: 120  # Default grace period
 
-# Chest loot configuration (editable staged table)
+# Reserved for global settings.
+```
+
+### chest-loot.yml ✅
+**Purpose:** Chest refill loot tables (editable)
+
+**Structure:**
+```yaml
 chest-loot:
   early:
     min-rolls: 3
     max-rolls: 6
     enchant-chance: 0.10
-    items:
-      - material: STONE_SWORD
-        min: 1
-        max: 1
-        weight: 6
-        enchants: [ "SHARPNESS:1" ]
+    items: [ ... ]
   mid:
     min-rolls: 4
     max-rolls: 7
@@ -88,7 +90,7 @@ chest-loot:
 - Weighted random item selection
 - Multiple editable loot tiers (early, mid, late)
 - Enchantment support
-- Direct runtime configuration in plugins/HungerGames/config.yml
+- Direct runtime configuration in plugins/HungerGames/chest-loot.yml
 
 **Managed By:** `ChestLootManager`
 
