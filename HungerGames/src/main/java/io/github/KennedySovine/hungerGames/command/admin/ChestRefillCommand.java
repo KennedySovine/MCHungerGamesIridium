@@ -63,7 +63,12 @@ public class ChestRefillCommand extends AbstractSubCommand {
         }
 
         working.setChestRefillSeconds(t);
-        MessageUtils.send(sender, "&aSet chest refill for working arena " + working.getId() + " to " + t + " seconds (in-memory). Use '/hg arena save' to persist.");
+        if (t == 0) {
+            MessageUtils.send(sender, "&eChest refills disabled for working arena " + working.getId() + " (interval set to 0). Use '/hg arena save' to persist.");
+            return true;
+        }
+
+        MessageUtils.send(sender, "&aSet chest refill for working arena " + working.getId() + " to " + t + " seconds (in-memory). Standard refill pacing is around 300 seconds. Use '/hg arena save' to persist.");
         return true;
     }
 }
