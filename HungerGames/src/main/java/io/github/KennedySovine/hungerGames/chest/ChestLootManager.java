@@ -308,10 +308,10 @@ public class ChestLootManager {
     private LootTable defaultLateTable() {
         List<LootEntry> entries = new ArrayList<>(defaultMidTable().entries);
         add(entries, Material.DIAMOND_SWORD, 1, 1, 2, 0.33, "SHARPNESS:2");
-        add(entries, Material.DIAMOND_HELMET, 1, 1, 1, 0.20, "PROTECTION:2");
-        add(entries, Material.DIAMOND_CHESTPLATE, 1, 1, 1, 0.20, "PROTECTION:2");
-        add(entries, Material.DIAMOND_LEGGINGS, 1, 1, 1, 0.20, "PROTECTION:2");
-        add(entries, Material.DIAMOND_BOOTS, 1, 1, 1, 0.20, "PROTECTION:2");
+        add(entries, Material.DIAMOND_HELMET, 1, 1, 1, 0.33, "PROTECTION:2");
+        add(entries, Material.DIAMOND_CHESTPLATE, 1, 1, 1, 0.33, "PROTECTION:2");
+        add(entries, Material.DIAMOND_LEGGINGS, 1, 1, 1, 0.33, "PROTECTION:2");
+        add(entries, Material.DIAMOND_BOOTS, 1, 1, 1, 0.33, "PROTECTION:2");
         add(entries, Material.GOLDEN_APPLE, 1, 1, 3, 0, null);
         add(entries, Material.ENCHANTED_GOLDEN_APPLE, 1, 1, 1, 0, null);
         return new LootTable(5, 8, 0.33, entries);

@@ -302,21 +302,25 @@ chest-loot:
         min: 1
         max: 1
         weight: 1
+        enchant-chance: 0.33
         enchants: [ "PROTECTION:2" ]
       - material: DIAMOND_CHESTPLATE
         min: 1
         max: 1
         weight: 1
+        enchant-chance: 0.33
         enchants: [ "PROTECTION:2" ]
       - material: DIAMOND_LEGGINGS
         min: 1
         max: 1
         weight: 1
+        enchant-chance: 0.33
         enchants: [ "PROTECTION:2" ]
       - material: DIAMOND_BOOTS
         min: 1
         max: 1
         weight: 1
+        enchant-chance: 0.33
         enchants: [ "PROTECTION:2" ]
       - material: GOLDEN_APPLE
         min: 1
